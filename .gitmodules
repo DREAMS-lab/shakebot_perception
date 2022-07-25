@@ -1,3 +1,0 @@
-[submodule "assets/apriltag-imgs"]
-	path = assets/apriltag-imgs
-	url = https://github.com/AprilRobotics/apriltag-imgs.git

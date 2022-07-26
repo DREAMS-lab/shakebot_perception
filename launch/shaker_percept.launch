@@ -10,7 +10,7 @@
 
   <group ns="$(arg camera_name)">
     <!-- uncomment the line below and select "camera" as fixed frame in order to view tags in rviz -->
-    <!-- <node pkg="tf" type="static_transform_publisher" name="myframe_to_camera" args="0 0 0 0 0 0 1 map camera 10" /> -->
+    <node pkg="tf" type="static_transform_publisher" name="myframe_to_camera" args="0 0 0 0 0 0 1 map camera 10" />
 
     <node pkg="nodelet" type="nodelet" name="camera_nodelet_manager" args="manager" />
 

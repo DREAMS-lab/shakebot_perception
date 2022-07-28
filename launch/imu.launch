@@ -1,0 +1,9 @@
+<launch>
+
+    <!-- This section is for imu -->
+    <group ns="imu_sensor">
+        <node pkg="shaker_percept" name="shaker_percept_imu" type="imu_pub" required="true" />
+    </group>
+    <!-- The imu section ends -->
+
+</launch>

@@ -9,7 +9,8 @@
 #include <time.h>
 #include <sys/types.h>
 #include <errno.h>
-#include "ros/ros.h"
+#include <ros/ros.h>
+#include <ros/console.h>
 #include <sensor_msgs/Imu.h>
 #include <tf2/LinearMath/Quaternion.h>
 
@@ -24,14 +25,18 @@ int uart_open(int fd, const char *pathname)
     if (-1 == fd)
     {
         perror("Can't Open Serial Port");
+        ROS_INFO("Can't Open Serial Port");
         return (-1);
     }
     else
-        printf("open %s success!\n", pathname);
+        // printf("open %s success!\n", pathname);
+        ROS_INFO("open %s success!\n", pathname);
     if (isatty(STDIN_FILENO) == 0)
-        printf("standard input is not a terminal device\n");
+        // printf("standard input is not a terminal device\n");
+        ROS_INFO("standard input is not a terminal device\n");
     else
-        printf("isatty success!\n");
+        // printf("isatty success!\n");
+        ROS_INFO("isatty success!\n");
     return fd;
 }
 
@@ -41,7 +46,8 @@ int uart_set(int fd, int nSpeed, int nBits, char nEvent, int nStop)
     if (tcgetattr(fd, &oldtio) != 0)
     {
         perror("SetupSerial 1");
-        printf("tcgetattr( fd,&oldtio) -> %d\n", tcgetattr(fd, &oldtio));
+        // printf("tcgetattr( fd,&oldtio) -> %d\n", tcgetattr(fd, &oldtio));
+        ROS_INFO("tcgetattr( fd,&oldtio) -> %d\n", tcgetattr(fd, &oldtio));
         return -1;
     }
     bzero(&newtio, sizeof(newtio));
@@ -120,7 +126,8 @@ int uart_set(int fd, int nSpeed, int nBits, char nEvent, int nStop)
         perror("com set error");
         return -1;
     }
-    printf("set done!\n");
+    // printf("set done!\n");
+    ROS_INFO("set done!\n");
     return 0;
 }
 
@@ -165,7 +172,9 @@ void ParseData(char chr, ros::Publisher data_pub)
         cTemp += chrBuf[i];
     if ((chrBuf[0] != 0x55) || ((chrBuf[1] & 0x50) != 0x50) || (cTemp != chrBuf[10]))
     {
-        printf("Error:%x %x\r\n", chrBuf[0], chrBuf[1]);
+        // printf("Error:%x %x\r\n", chrBuf[0], chrBuf[1]);
+        ROS_INFO("Error:%x %x\r\n", chrBuf[0], chrBuf[1]);
+        
         memcpy(&chrBuf[0], &chrBuf[1], 10);
         chrCnt--;
         return;
@@ -178,7 +187,7 @@ void ParseData(char chr, ros::Publisher data_pub)
         for (i = 0; i < 3; i++)
             a[i] = (float)sData[i] / 32768.0 * 16.0;
         time(&now);
-        printf("\r\nT:%s a:%6.3f %6.3f %6.3f ", asctime(localtime(&now)), a[0], a[1], a[2]);
+        // printf("\r\nT:%s a:%6.3f %6.3f %6.3f ", asctime(localtime(&now)), a[0], a[1], a[2]);
         msg.linear_acceleration.x = a[0];
         msg.linear_acceleration.y = a[1];
         msg.linear_acceleration.z = a[2];
@@ -186,7 +195,7 @@ void ParseData(char chr, ros::Publisher data_pub)
     case 0x52:
         for (i = 0; i < 3; i++)
             w[i] = (float)sData[i] / 32768.0 * 2000.0;
-        printf("w:%7.3f %7.3f %7.3f ", w[0], w[1], w[2]);
+        // printf("w:%7.3f %7.3f %7.3f ", w[0], w[1], w[2]);
         msg.angular_velocity.x = w[0];
         msg.angular_velocity.y = w[1];
         msg.angular_velocity.z = w[2];
@@ -194,7 +203,7 @@ void ParseData(char chr, ros::Publisher data_pub)
     case 0x53:
         for (i = 0; i < 3; i++)
             Angle[i] = (float)sData[i] / 32768.0 * 180.0;
-        printf("A:%7.3f %7.3f %7.3f ", Angle[0], Angle[1], Angle[2]);
+        // printf("A:%7.3f %7.3f %7.3f ", Angle[0], Angle[1], Angle[2]);
         myQuaternion.setRPY(Angle[0], Angle[1], Angle[2]);
         myQuaternion = myQuaternion.normalize();
         msg.orientation.x = myQuaternion.getX();
@@ -205,7 +214,7 @@ void ParseData(char chr, ros::Publisher data_pub)
     case 0x54:
         for (i = 0; i < 3; i++)
             h[i] = (float)sData[i];
-        printf("h:%4.0f %4.0f %4.0f ", h[0], h[1], h[2]);
+        // printf("h:%4.0f %4.0f %4.0f ", h[0], h[1], h[2]);
 
         break;
     }
@@ -217,7 +226,7 @@ int main(int argc, char** argv)
 {
     ros::init(argc, argv, "imu");
     ros::NodeHandle n;
-    ros::Rate loop_rate(10);
+    // ros::Rate loop_rate(10);
     ros::Publisher data_pub = n.advertise<sensor_msgs::Imu>("/imu_data", 1000);
     
 
@@ -254,7 +263,7 @@ int main(int argc, char** argv)
         }
         // usleep(1000);
         ros::spinOnce();
-        loop_rate.sleep();
+        // loop_rate.sleep();
     }
 
     ret = uart_close(fd);

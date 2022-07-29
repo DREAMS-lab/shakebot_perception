@@ -1,3 +1,7 @@
+// This file will acquire data from witmotion HWT905-TTL inclinometer (IMU) sensor
+// and create a node "imu" to publish the acquired data to "/imu_data" topic
+
+// All include libraries
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -14,11 +18,13 @@
 #include <sensor_msgs/Imu.h>
 #include <tf2/LinearMath/Quaternion.h>
 
+// few global definitions
 static int ret;
 static int fd;
 sensor_msgs::Imu msg;
 #define BAUD 9600 // 115200 for JY61 ,9600 for others
 
+// this function will open the serial port for communication
 int uart_open(int fd, const char *pathname)
 {
     fd = open(pathname, O_RDWR | O_NOCTTY);
@@ -40,6 +46,7 @@ int uart_open(int fd, const char *pathname)
     return fd;
 }
 
+// This function will set the serial port parameters
 int uart_set(int fd, int nSpeed, int nBits, char nEvent, int nStop)
 {
     struct termios newtio, oldtio;
@@ -131,6 +138,7 @@ int uart_set(int fd, int nSpeed, int nBits, char nEvent, int nStop)
     return 0;
 }
 
+//  This function will close the serial port
 int uart_close(int fd)
 {
     assert(fd);
@@ -138,11 +146,15 @@ int uart_close(int fd)
 
     return 0;
 }
+
+// This function will send data using serial port
 int send_data(int fd, char *send_buffer, int length)
 {
     length = write(fd, send_buffer, length * sizeof(unsigned char));
     return length;
 }
+
+// This function will receive data using serial port
 int recv_data(int fd, char *recv_buffer, int length)
 {
     length = read(fd, recv_buffer, length);
@@ -150,6 +162,7 @@ int recv_data(int fd, char *recv_buffer, int length)
 }
 double a[3], w[3], Angle[3], h[3];
 
+// This function is used to parse the received data and publish it
 void ParseData(char chr, ros::Publisher data_pub)
 {
     tf2::Quaternion myQuaternion;
@@ -204,7 +217,7 @@ void ParseData(char chr, ros::Publisher data_pub)
         for (i = 0; i < 3; i++)
             Angle[i] = (float)sData[i] / 32768.0 * 180.0;
         // printf("A:%7.3f %7.3f %7.3f ", Angle[0], Angle[1], Angle[2]);
-        myQuaternion.setRPY(Angle[0], Angle[1], Angle[2]);
+        myQuaternion.setRPY(Angle[0], Angle[1], Angle[2]);  // Converting Euler to Quaternion for publishing
         myQuaternion = myQuaternion.normalize();
         msg.orientation.x = myQuaternion.getX();
         msg.orientation.y = myQuaternion.getY();
@@ -222,11 +235,11 @@ void ParseData(char chr, ros::Publisher data_pub)
     data_pub.publish(msg);
 }
 
+// The main function of the program
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "imu");
     ros::NodeHandle n;
-    // ros::Rate loop_rate(10);
     ros::Publisher data_pub = n.advertise<sensor_msgs::Imu>("/imu_data", 1000);
     
 
@@ -261,9 +274,8 @@ int main(int argc, char** argv)
             fprintf(fp, "%2X ", r_buf[i]);
             ParseData(r_buf[i], data_pub);
         }
-        // usleep(1000);
+        usleep(1000);
         ros::spinOnce();
-        // loop_rate.sleep();
     }
 
     ret = uart_close(fd);

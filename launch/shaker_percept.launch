@@ -1,3 +1,7 @@
+<!-- This launch file will start the camera and publish the raw camera image along with rectified image provided the camera is calibrated.
+Moreover, it will also start the april tag detection node to detect the april tags and publish its tf. 
+In addition, will create a node for imu and will start the imu_pub publisher to publish the imu data. -->
+
 <launch>
 
 <!-- This section is for point grey camera node -->

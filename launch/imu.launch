@@ -1,3 +1,5 @@
+<!-- This launch file will create a node for imu and will start the imu_pub publisher to publish the imu data -->
+
 <launch>
 
     <!-- This section is for imu -->

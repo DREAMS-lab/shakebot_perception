@@ -8,4 +8,6 @@
     </group>
     <!-- The imu section ends -->
 
+    <node pkg="tf" type="static_transform_publisher" name="myframe_to_camera" args="0 0 0 0 0 0 1 map HWT905 10" />
+
 </launch>

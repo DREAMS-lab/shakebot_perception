@@ -4,9 +4,9 @@ In addition, will create a node for imu and will start the imu_pub publisher to 
 
 <launch>
 
-<!-- This section is for point grey camera node -->
+	<!-- This section is for point grey camera node -->
 
-   <!-- Determine this using rosrun pointgrey_camera_driver list_cameras.
+   	<!-- Determine this using rosrun pointgrey_camera_driver list_cameras.
        If not specified, defaults to first camera found. -->
 	<arg name="camera_name" default="camera" />
 	<arg name="camera_serial" default="0" />
@@ -66,6 +66,9 @@ In addition, will create a node for imu and will start the imu_pub publisher to 
 	<group ns="imu_sensor">
 		<node pkg="shakebot_perception" name="shakebot_perception_imu" type="imu_pub" required="true" />
 	</group>
-<!-- The imu section ends -->
+
+	<node pkg="tf" type="static_transform_publisher" name="map2HWT905" args="0 0 0 0 0 0 1 map HWT905 10" />
+
+	<!-- The imu section ends -->
 
 </launch>

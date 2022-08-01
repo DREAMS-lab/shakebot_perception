@@ -20,10 +20,23 @@ This package has following 3 launch files
 2. `imu.launch`: It will launch nodes to publish data acquired from Imu.
 3. `shakebot_perception.launch`: It will launch nodes that will function as combined of both above mentioned launch files.
 
-User can run as per requirement. The command to run this launch file is
+User can run as per requirement. The command to run any launch file is
 ```
 roslaunch shakebot_perception <launch file>
 
 roslaunch shakebot_perception shakebot_perception.launch     # example to launch shakebot_preception.launch file
 ```
+## Visualization
 
+One can visualize the pose of apriltag and Imu captured by camera and Imu sensor respectively in Rviz.
+
+this can be done by following command which will open up rviz 
+```
+rosrun rviz rviz
+```
+
+Things to configure in rviz for apriltag pose visualization:
+- select the fixed frame as "camera".
+- click on "add" button and select "TF" from the list.
+
+Now one can try to detect the apriltag and can visualize its position and orientation in rviz.

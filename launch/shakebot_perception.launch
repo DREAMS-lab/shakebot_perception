@@ -14,7 +14,7 @@ In addition, will create a node for imu and will start the imu_pub publisher to 
 
 	<group ns="$(arg camera_name)">
 		<!-- uncomment the line below and select "camera" as fixed frame in order to view tags in rviz -->
-		<node pkg="tf" type="static_transform_publisher" name="myframe_to_camera" args="0 0 0 0 0 0 1 map camera 10" />
+		<node pkg="tf" type="static_transform_publisher" name="map2camera" args="0 0 0 0 0 0 1 map camera 10" />
 
 		<node pkg="nodelet" type="nodelet" name="camera_nodelet_manager" args="manager" />
 
@@ -50,8 +50,8 @@ In addition, will create a node for imu and will start the imu_pub publisher to 
 		<arg name="image_topic" default="image_rect_color" />
 
 		<!-- Set parameters -->
-		<rosparam command="load" file="$(find shaker_percept)/config/settings.yaml" ns="$(arg node_namespace)" />
-		<rosparam command="load" file="$(find shaker_percept)/config/tags.yaml" ns="$(arg node_namespace)" />
+		<rosparam command="load" file="$(find shakebot_perception)/config/settings.yaml" ns="$(arg node_namespace)" />
+		<rosparam command="load" file="$(find shakebot_perception)/config/tags.yaml" ns="$(arg node_namespace)" />
 	
 		<node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="$(arg node_namespace)" clear_params="true" output="screen" launch-prefix="$(arg launch_prefix)" >
 		<!-- Remap topics from those used in code to those on the ROS network -->
@@ -64,7 +64,7 @@ In addition, will create a node for imu and will start the imu_pub publisher to 
 
 	<!-- This section is for imu -->
 	<group ns="imu_sensor">
-		<node pkg="shaker_percept" name="shaker_percept_imu" type="imu_pub" required="true" />
+		<node pkg="shakebot_perception" name="shakebot_perception_imu" type="imu_pub" required="true" />
 	</group>
 <!-- The imu section ends -->
 

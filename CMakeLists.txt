@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(shaker_percept)
+project(shakebot_perception)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -100,7 +100,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy sensor_msgs apriltag_ros ap
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES shaker_percept
+#  LIBRARIES shakebot_perception
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
 )
@@ -118,7 +118,7 @@ ${catkin_INCLUDE_DIRS}
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/shaker_percept.cpp
+#   src/${PROJECT_NAME}/shakebot_perception.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -193,7 +193,7 @@ target_link_libraries(imu_pub
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_shaker_percept.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_shakebot_perception.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

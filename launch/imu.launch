@@ -4,10 +4,10 @@
 
     <!-- This section is for imu -->
     <group ns="imu_sensor">
-        <node pkg="shaker_percept" name="shaker_percept_imu" type="imu_pub" required="true" />
+        <node pkg="shakebot_perception" name="shakebot_perception_imu" type="imu_pub" required="true" />
     </group>
     <!-- The imu section ends -->
 
-    <node pkg="tf" type="static_transform_publisher" name="myframe_to_camera" args="0 0 0 0 0 0 1 map HWT905 10" />
+    <node pkg="tf" type="static_transform_publisher" name="map2HWT905" args="0 0 0 0 0 0 1 map HWT905 10" />
 
 </launch>

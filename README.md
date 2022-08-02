@@ -1,8 +1,14 @@
 # shakebot_perception
-The perception ros package for shakebot. This package is made to estimate and verify the pose and acceleration of the shake table. It will prvoide us the data to know the ground truth value motion of the shakebot.
+The perception ros package for shakebot. This package is made to estimate and verify the pose and acceleration of the shake table. It will provide us the data to know the ground truth motion of the shakebot. The pose will be measured from apriltag and the acceleration will be measured from Imu.
 
 - The camera used for this package is "Chameleon3 with model number CM3-U3-13Y3C-CS".
 - The Imu sensor used for this package is "Wit Motion HWT905-TTL" accelerometer or inclinometer sensor.
+
+This perception package will require high computation for smooth processing so it is recommended to use a laptop or some high processing embedded CPU. We have already tested on raspberry pi 4 model b and it was lagging.
+
+The accelerometer can be purchase from [this link](https://www.amazon.com/dp/B07G21XRV6/ref=emc_b_5_t)
+
+Moreover, one can find all the details regarding accelerometer [here](https://github.com/WITMOTION/HWT905-TTL)
 
 ## Getting Started
 Follow the below steps for environment setup
@@ -11,12 +17,12 @@ mkdir -p ~/catkin_ws/src    # make a new workspace (or you can clone in already 
 cd ~/catkin_ws/src          # navigate to the source space
 git clone https://github.com/AprilRobotics/apriltag.git      # Clone Apriltag library
 git clone https://github.com/AprilRobotics/apriltag_ros.git  # Clone Apriltag ROS wrapper
-git clone https://github.com/DREAMS-lab/shaker_percept.git  # Clone shake_percept package
+git clone https://github.com/DREAMS-lab/shakebot_perception.git  # Clone shakbot_perception package
 cd ~/catkin_ws              # Navigate to the workspace
 rosdep install --from-paths src --ignore-src -r -y  # install any missing packages
 catkin_make_isolated    # Build all packages in workspace (catkin build will also work)
 ```
-After setting up the environment its time for camera calibration. The reference for monocular camera calibration can be found [here](http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration).
+After setting up the environment its time for camera calibration as its needed to detect apriltag's pose. The reference for monocular camera calibration can be found [here](http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration).
 
 To publish the camera images over ROS use the following command
 ```

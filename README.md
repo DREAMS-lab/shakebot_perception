@@ -5,7 +5,6 @@ The perception ros package for shakebot. This package is made to estimate and ve
 - The Imu sensor used for this package is "Wit Motion HWT905-TTL" accelerometer or inclinometer sensor.
 
 ## Getting Started
----
 Follow the below steps for environment setup
 ```
 mkdir -p ~/catkin_ws/src    # make a new workspace (or you can clone in already present workspace)
@@ -32,7 +31,6 @@ rosrun camera_calibration cameracalibrator.py --size 10x8 --square 0.020 image:=
 follow the calibration process mentioned [here](http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration)
 
 ## Quickstart
----
 This package has following 3 launch files
 
 1. `camera_detection.launch`: It will launch nodes that will only detect the apriltags and publish its pose.
@@ -46,7 +44,6 @@ roslaunch shakebot_perception <launch file>
 roslaunch shakebot_perception shakebot_perception.launch     # example to launch shakebot_preception.launch file
 ```
 ## Visualization
----
 One can visualize the pose of apriltag and Imu captured by camera and Imu sensor respectively in Rviz.
 
 this can be done by following command which will open up rviz 

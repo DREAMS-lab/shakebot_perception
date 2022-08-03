@@ -37,6 +37,10 @@ rosrun camera_calibration cameracalibrator.py --size 10x8 --square 0.020 image:=
 follow the calibration process mentioned [here](http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration)
 
 ## Quickstart
+We have used apriltag_ros package for apriltag detection. The inputs for this package are `/camera/imge_rect`and `/camera/camera_info` topics. However, the outputs will be `/tf`, `/tag_detections` and `/tag_detections_image` topics.
+
+one needs to print apriltags which can be found [here](assets/apriltag-imgs)
+
 This package has following 3 launch files
 
 1. `camera_detection.launch`: It will launch nodes that will only detect the apriltags and publish its pose.
@@ -49,6 +53,8 @@ roslaunch shakebot_perception <launch file>
 
 roslaunch shakebot_perception shakebot_perception.launch     # example to launch shakebot_preception.launch file
 ```
+
+In order to detect the apriltags, one needs to enter tag details to [tags.yaml](/config/tags.yaml)
 ## Visualization
 One can visualize the pose of apriltag and Imu captured by camera and Imu sensor respectively in Rviz.
 

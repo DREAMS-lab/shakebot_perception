@@ -1,12 +1,10 @@
 # shakebot_perception
 The perception ros package for shakebot. This package is made to estimate and verify the pose and acceleration of the shake table. It will provide us the data to know the ground truth motion of the shakebot. The pose will be measured from apriltag and the acceleration will be measured from Imu.
 
-- The camera used for this package is "Chameleon3 with model number CM3-U3-13Y3C-CS".
-- The Imu sensor used for this package is "Wit Motion HWT905-TTL" accelerometer or inclinometer sensor.
+- The camera used for this package is "Chameleon3 with model number [CM3-U3-13Y3C-CS](https://www.edmundoptics.com/p/cm3-u3-13y3c-12-chameleon3-color-camera/2862/)", which has frame rate as high as 149 fps. 
+- The Imu sensor used for this package is "[Wit Motion HWT905-TTL](https://www.amazon.com/dp/B07G21XRV6/ref=emc_b_5_t)" accelerometer or inclinometer sensor.
 
 This perception package will require high computation for smooth processing so it is recommended to use a laptop or some high processing embedded CPU. We have already tested on raspberry pi 4 model b and it was lagging.
-
-The accelerometer can be purchase from [this link](https://www.amazon.com/dp/B07G21XRV6/ref=emc_b_5_t)
 
 Moreover, one can find all the details regarding accelerometer [here](https://github.com/WITMOTION/HWT905-TTL)
 
@@ -39,7 +37,9 @@ follow the calibration process mentioned [here](http://wiki.ros.org/camera_calib
 ## Quickstart
 We have used apriltag_ros package for apriltag detection. The inputs for this package are `/camera/imge_rect`and `/camera/camera_info` topics. However, the outputs will be `/tf`, `/tag_detections` and `/tag_detections_image` topics.
 
-one needs to print apriltags which can be found [here](assets/apriltag-imgs)
+One needs to print apriltags which can be found [here](assets/apriltag-imgs).
+
+In order to detect the apriltags, one needs to enter tag details to [tags.yaml](/config/tags.yaml).
 
 This package has following 3 launch files
 
@@ -54,7 +54,7 @@ roslaunch shakebot_perception <launch file>
 roslaunch shakebot_perception shakebot_perception.launch     # example to launch shakebot_preception.launch file
 ```
 
-In order to detect the apriltags, one needs to enter tag details to [tags.yaml](/config/tags.yaml)
+
 ## Visualization
 One can visualize the pose of apriltag and Imu captured by camera and Imu sensor respectively in Rviz.
 
@@ -73,4 +73,4 @@ Things to configure in rviz for Imu visualization:
 - select the fixed frame as "HWT905".
 - click on "add" button , go to by topic and select "imu" from the list.
 
-> **_Note:_** View each data individually. Both camera and Imu data cannot be viewed at same time.
+> **_Note:_** View each data individually. Both camera and Imu data cannot be viewed at same time, because their parent frames are different.

@@ -1,4 +1,4 @@
-# shakebot_perception
+# Shakebot_Perception
 The perception ros package for shakebot. This package is made to estimate and verify the pose and acceleration of the shake table. It will provide us the data to know the ground truth motion of the shakebot. The pose will be measured from apriltag and the acceleration will be measured from Imu.
 
 - The camera used for this package is "Chameleon3 with model number [CM3-U3-13Y3C-CS](https://www.edmundoptics.com/p/cm3-u3-13y3c-12-chameleon3-color-camera/2862/)", which has frame rate as high as 149 fps. 

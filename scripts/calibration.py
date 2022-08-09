@@ -66,8 +66,7 @@ class calibration:
         self.window.close()
         
 if __name__=="__main__":
-    # try:
-    #     calibration()
-    # except Exception as e:
-    #     print(e)
-    calibration()
+    try:
+        calibration()
+    except Exception as e:
+        print(e)

@@ -1,0 +1,6 @@
+#goal
+bool recorder_state
+---
+#result
+bool recorder_result
+---

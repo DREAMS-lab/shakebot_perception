@@ -7,7 +7,7 @@ project(shakebot_perception)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy sensor_msgs apriltag_ros apriltag tf tf2 image_proc pointgrey_camera_driver)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs sensor_msgs apriltag_ros apriltag tf tf2 image_proc pointgrey_camera_driver genmsg  actionlib_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -57,17 +57,19 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy sensor_msgs apriltag_ros ap
 # )
 
 ## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
+add_action_files(
+  FILES
+  recorder_automation.action
+)
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   sensor_msgs  # Or other packages containing msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  actionlib_msgs
+  std_msgs
+  geometry_msgs
+  sensor_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##

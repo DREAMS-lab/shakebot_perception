@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import rospy
 import time
 import numpy as np
@@ -10,6 +11,8 @@ from cv_bridge import CvBridge
 import cv2 as cv
 from sensor_msgs.msg import Image, Imu
 import message_filters as mf
+import actionlib
+from shakebot_perception.msg import recorder_automationResult, recorder_automationAction
 
 class data_acquisition:
     def __init__(self):
@@ -20,17 +23,9 @@ class data_acquisition:
         self.record = False
         self.write = False
         self.initialize = False
-        sg.theme("LightGreen")
-        self.bridge = CvBridge()
-        layout = [[sg.Image(key="-IMAGE-")],[sg.Button("Start Initialization")],[sg.Button("Start Recording"), sg.Button("Stop Recording")]]
-        self.window = sg.Window("Calibrator", layout, finalize=True)
-        # self.main()
-        
-    def updateImage(self, msg):
-        img = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
-        img = cv.resize(img, [640, 480])
-        imgbytes = cv.imencode(".png", img)[1].tobytes()
-        self.window["-IMAGE-"].update(data=imgbytes)
+        self.a_server = actionlib.SimpleActionServer("shakebot_recorder_as",recorder_automationAction, execute_cb=self.execute_cb, auto_start=False)
+        self.a_server.start()
+        self.result = recorder_automationResult()
     
     def setHomePose(self, tstamp, data):
         self.home = self.getCentroidPose(tstamp, data)
@@ -94,34 +89,40 @@ class data_acquisition:
                 pdData.to_csv("./scripts/recorded.csv")
                 self.write = False
                 print("exiting")
-                
+    
+    def execute_cb(self, goal):
+        success=True
+        published = True
+        self.result.recorder_result = False
+        self.goal_recorder_state = goal.recorder_state
+        while published:
+            if self.a_server.is_preempt_requested():
+                success = False
+                break
+            
+            if success:
+                if self.goal_recorder_state is True:
+                    rospy.loginfo("started recording")
+                    self.initialize = True
+                    self.record = True
+                    self.result.recorder_result = True
+                    self.a_server.set_succeeded(self.result)
+                    published = False
+                    
+                if self.goal_recorder_state is False:
+                    rospy.loginfo("stopped recording")
+                    self.record = False
+                    self.write = True
+                    self.result.recorder_result = True
+                    self.a_server.set_succeeded(self.result)
+                    published = False
     
     def main(self):
         print("inside main")
         tag_sub = mf.Subscriber("/apriltag_detection/tag_detections", AprilTagDetectionArray)
-        img_sub = rospy.Subscriber("/apriltag_detection/tag_detections_image", Image, self.updateImage)
         imu_sub = mf.Subscriber("/imu_data", Imu)
         ts = mf.ApproximateTimeSynchronizer([tag_sub, imu_sub],20,5,1)
         ts.registerCallback(self.setBedPose)
-        self.tic = time.perf_counter()
-        while not rospy.is_shutdown():
-            event, values = self.window.read(timeout=20)
-            
-            if event == sg.WIN_CLOSED:
-                break
-            
-            if self.detected is True:
-                if event == "Start Initialization":
-                    self.initialize = True
-                    
-                if event == "Start Recording":
-                    self.record = True
-                    
-                if event == "Stop Recording":
-                    self.record = False
-                    self.write = True
-
-        self.window.close()
         rospy.spin()
     
 if __name__=="__main__":
@@ -130,4 +131,5 @@ if __name__=="__main__":
         s.main()
     except Exception as e:
         print(e)
-    # data_acquisition()
+    # s = data_acquisition()
+    # s.main()

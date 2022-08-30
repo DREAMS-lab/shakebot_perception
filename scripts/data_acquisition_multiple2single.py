@@ -74,25 +74,32 @@ class data_acquisition:
                 time.sleep(1)
                 self.setHomePose(tstamp, self.tagsDict)
                 self.initialize = False
-                rospy.loginfo("Home position set success")
+                rospy.loginfo("Home position set success!")
             
             if self.record is True:
                 FPose = {}
-                for i in self.tagsDict[tstamp]:
-                    FPose.update(self.np2dictspec(tstamp, i, np.matmul(tform.inverse_matrix(self.dict2np(self.home[i])), self.dict2np(self.tagsDict[tstamp][i]))))
-                singlePosenp = self.getCentroidPose(tstamp, FPose)
-                if tstamp not in self.data:
-                    self.data[tstamp] = {}
-                if "pose" not in self.data:
-                    self.data[tstamp]["pose"] = {}
-                if "acceleration" not in self.data:
-                    self.data[tstamp]["acceleration"] = {}
-                self.data[tstamp]["acceleration"] = self.imuMsg2dict(tstamp, imu_msg)[tstamp]["acceleration"]
-                self.data[tstamp]["pose"] = self.np2dictgen(tstamp, singlePosenp)[tstamp]["pose"]
+                for i in self.home:
+                    try:
+                        mul = True
+                        FPose.update(self.np2dictspec(tstamp, i, np.matmul(tform.inverse_matrix(self.dict2np(self.home[i])), self.dict2np(self.tagsDict[tstamp][i]))))
+                    except Exception as e:
+                        mul = False
+                        rospy.loginfo(e)
+                if mul:
+                    singlePosenp = self.getCentroidPose(tstamp, FPose)
+                    if tstamp not in self.data:
+                        self.data[tstamp] = {}
+                    if "pose" not in self.data:
+                        self.data[tstamp]["pose"] = {}
+                    if "acceleration" not in self.data:
+                        self.data[tstamp]["acceleration"] = {}
+                    self.data[tstamp]["acceleration"] = self.imuMsg2dict(tstamp, imu_msg)[tstamp]["acceleration"]
+                    self.data[tstamp]["pose"] = self.np2dictgen(tstamp, singlePosenp)[tstamp]["pose"]
 
             if self.write is True:
-                pdData = pd.DataFrame(self.data)            
-                pdData.to_csv("./scripts/recorded.csv")
+                pdData = pd.DataFrame(self.data)
+                rospy.loginfo("saving file.....")
+                pdData.to_csv("~/catkin_ws/src/shakebot_perception/scripts/recorded.csv")
                 self.write = False
                 rospy.loginfo("exiting")
     
@@ -128,6 +135,7 @@ class data_acquisition:
         imu_sub = mf.Subscriber("/imu_data", Imu)
         ts = mf.ApproximateTimeSynchronizer([tag_sub, imu_sub],20,5,1)
         ts.registerCallback(self.setBedPose)
+        rospy.loginfo("publish goal to start recording!!")
         rospy.spin()
         
     

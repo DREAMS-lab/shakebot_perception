@@ -4,3 +4,4 @@ recorded.csv
 perceptionCalib.yaml
 Record.txt
 data_acquisition.py
+__pycache__

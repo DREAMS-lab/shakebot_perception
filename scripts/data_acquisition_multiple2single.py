@@ -10,6 +10,7 @@ from sensor_msgs.msg import Image, Imu
 import message_filters as mf
 import actionlib
 from shakebot_perception.msg import recorder_automationResult, recorder_automationAction
+from velocity_calc import velocity_calc
 
 class data_acquisition:
     def __init__(self):
@@ -101,7 +102,9 @@ class data_acquisition:
                 rospy.loginfo("saving file.....")
                 pdData.to_csv("~/catkin_ws/src/shakebot_perception/scripts/recorded.csv")
                 self.write = False
-                rospy.loginfo("exiting")
+                s = velocity_calc()
+                s.main()
+                # rospy.loginfo("exiting")
     
     def execute_cb(self, goal):
         success=True

@@ -4,6 +4,7 @@ import ast
 import matplotlib.pyplot as plt
 from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy.signal import butter, filtfilt
+from datetime import timedelta
 
 
 class velocity_cal:
@@ -72,6 +73,12 @@ class velocity_cal:
                 
         return data
 
+    def cal_time_period(self, lst):
+        print(lst[-1], lst[0])
+        t = (float(lst[-1]) - float(lst[0]))
+        t = timedelta(milliseconds=t/1000).total_seconds()
+        return t
+    
     def plot(self, data):
         f = plt.figure(dpi=300)
         plt.xlabel("time (sec)")
@@ -80,7 +87,7 @@ class velocity_cal:
             plt.plot([x[1] for x in i], [x[0] for x in i])
         plt.show()
         
-    def butter_lowpass_filter(sample_data, cutoff, fs, order, n, ):
+    def butter_lowpass_filter(self, sample_data, cutoff, fs, order, n, ):
         data = sample_data[:n]
         normal_cutoff = cutoff / nyq
         # Get the filter coefficients 
@@ -101,15 +108,17 @@ class velocity_cal:
         accx = self.extractData("accx", self.data)
         accy = self.extractData("accy", self.data)
         accz = self.extractData("accz", self.data)
-        T = 25.        # Sample period
-        fs = 40       # Accelerometer sampling rate, Hz
-        cutoff = 30     # desired cutoff frequency of the filter, Hz, slightly higher than actual 30 Hz
-        nyq = 0.5 * fs  # Nyquist Frequency: 
+        
+        T = self.cal_time_period(sorted(self.data["timestamp"]))        # Sample period
+        print(T)
+        # fs = 40       # Accelerometer sampling rate, Hz
+        # cutoff = 30     # desired cutoff frequency of the filter, Hz, slightly higher than actual 30 Hz
+        # nyq = 0.5 * fs  # Nyquist Frequency: 
 
-        order = 2       # butterworth filter order
-        n = int(T * fs) # total number of samples
+        # order = 2       # butterworth filter order
+        # n = int(T * fs) # total number of samples
 
-        filtered_acc = butter_lowpass_filter(accy, cutoff, fs, order, n)
+        # filtered_acc = self.butter_lowpass_filter(accy, cutoff, fs, order, n)
         self.plot([posx[:], accy[:]])
     
 if __name__=="__main__":

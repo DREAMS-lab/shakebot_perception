@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+
+from cProfile import label
 import pandas as pd
 import numpy as np
 import ast
@@ -7,7 +10,7 @@ from scipy.signal import butter, filtfilt
 from datetime import timedelta
 
 
-class velocity_cal:
+class velocity_calc:
     def __init__(self):
         self.data = {}
         
@@ -76,19 +79,21 @@ class velocity_cal:
     def cal_time_period(self, lst):
         print(lst[-1], lst[0])
         t = (float(lst[-1]) - float(lst[0]))
-        t = timedelta(milliseconds=t/1000).total_seconds()
+        t = timedelta(microseconds=t/1000).total_seconds()
         return t
     
-    def plot(self, data):
+    def plot(self, data, labels):
         f = plt.figure(dpi=300)
         plt.xlabel("time (sec)")
         plt.ylabel("acc (m/s^2)")
-        for i in data:
-            plt.plot([x[1] for x in i], [x[0] for x in i])
+        for i, label in zip(data,labels):
+            plt.plot([x[1] for x in i], [x[0] for x in i], label=label)
+        plt.legend()
         plt.show()
         
     def butter_lowpass_filter(self, sample_data, cutoff, fs, order, n, ):
         data = sample_data[:n]
+        nyq = 0.5 * fs  # Nyquist Frequency:
         normal_cutoff = cutoff / nyq
         # Get the filter coefficients 
         b, a = butter(order, normal_cutoff, btype='low', analog=False)
@@ -96,31 +101,29 @@ class velocity_cal:
         return y
     
     def main(self):
-        self.data = pd.read_csv("scripts/recorded.csv")
+        self.data = pd.read_csv("~/catkin_ws/src/shakebot_perception/scripts/recorded.csv")
         self.data = self.format_pd(self.data)
         posx = self.extractData("posx", self.data)
-        posy = self.extractData("posy", self.data)
-        posz = self.extractData("posz", self.data)
+        # posy = self.extractData("posy", self.data)
+        # posz = self.extractData("posz", self.data)
         # qx = self.extractData("qx", self.data)
         # qy = self.extractData("qy", self.data)
         # qz = self.extractData("qz", self.data)
         # qw = self.extractData("qw", self.data)
-        accx = self.extractData("accx", self.data)
+        # accx = self.extractData("accx", self.data)
         accy = self.extractData("accy", self.data)
-        accz = self.extractData("accz", self.data)
+        # accz = self.extractData("accz", self.data)
         
-        T = self.cal_time_period(sorted(self.data["timestamp"]))        # Sample period
-        print(T)
+        # T = self.cal_time_period(sorted(self.data["timestamp"]))        # Sample period
+        # print(T)
         # fs = 40       # Accelerometer sampling rate, Hz
-        # cutoff = 30     # desired cutoff frequency of the filter, Hz, slightly higher than actual 30 Hz
-        # nyq = 0.5 * fs  # Nyquist Frequency: 
-
+        # cutoff = 30     # desired cutoff frequency of the filter, Hz, slightly higher than actual 30 Hz 
         # order = 2       # butterworth filter order
         # n = int(T * fs) # total number of samples
 
         # filtered_acc = self.butter_lowpass_filter(accy, cutoff, fs, order, n)
-        self.plot([posx[:], accy[:]])
+        self.plot([posx[:], accy[:]], ["position", "acceleration"])
     
 if __name__=="__main__":
-    s = velocity_cal()
+    s = velocity_calc()
     s.main()

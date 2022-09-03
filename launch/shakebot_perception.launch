@@ -72,9 +72,9 @@ In addition, will create a node for imu and will start the imu_pub publisher to 
 	<!-- The imu section ends -->
 
 	<!-- This section is for data recorder node -->
-	<group ns="data_acquisition">
-		<node pkg="shakebot_perception" name="shakebot_perception_recorder" type="data_acquisition_multiple2single.py" output="screen"/>
-	</group>
+	<!-- <group ns="data_acquisition">
+		<node pkg="shakebot_perception" name="shakebot_perception_recorder" type="data_acquisition_new.py" output="screen"/>
+	</group> -->
 	<!-- Data recorder section ends -->
 
 </launch>

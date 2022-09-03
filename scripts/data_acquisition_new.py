@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import rospy
 import time
+import os
 import numpy as np
 from statistics import mean
 from tf import transformations as tform
@@ -10,6 +11,7 @@ from sensor_msgs.msg import Image, Imu
 import message_filters as mf
 import actionlib
 from shakebot_perception.msg import recorder_automationResult, recorder_automationAction
+import json
 
 class data_acquisition:
     def __init__(self):
@@ -61,46 +63,52 @@ class data_acquisition:
         return rdict
     
     def fetchImu(self, imu_msg):
-        self.data["acceleration"] = self.imuMsg2dict(imu_msg)["acceleration"]
+        if self.write is False:
+            tstamp = str(imu_msg.header.stamp)
+            if tstamp not in self.data:
+                self.data[tstamp] = {}
+            self.data[tstamp]["acceleration"]=self.imuMsg2dict(imu_msg)["acceleration"]
+        else:
+            pass
     
-    def setBedPose(self, tag_msg, imu_msg):
-        self.tagsDict={}
-        
-        if tag_msg.detections:
-            self.tags = tag_msg.detections
-            tstamp = str(tag_msg.header.stamp)
-            for i in self.tags:
-                self.tagsDict.update({i.id:{"pose":{ "position":{ "x": i.pose.pose.pose.position.x, "y":i.pose.pose.pose.position.y, "z":i.pose.pose.pose.position.z }, "orientation":{ "x":i.pose.pose.pose.orientation.x, "y":i.pose.pose.pose.orientation.y, "z":i.pose.pose.pose.orientation.z, "w":i.pose.pose.pose.orientation.w }}}})
-            self.detected = True
+    def setBedPose(self, tag_msg):
+        if self.write is False:
+            self.tagsDict={}
             
-            if self.initialize is True:
-                time.sleep(1)
-                self.setHomePose(self.tagsDict)
-                self.initialize = False
-                rospy.loginfo("Home position set success!")
-            
-            if self.record is True:
-                FPose = {}
-                for i in self.home:
-                    if i in self.tagsDict:
-                        FPose.update(self.np2dictspec(i, np.matmul(tform.inverse_matrix(self.dict2np(self.home[i])), self.dict2np(self.tagsDict[i]))))
-                    
-                singlePosenp = self.getCentroidPose(FPose)
-                if tstamp not in self.data:
-                    self.data[tstamp] = {}
-                if "pose" not in self.data:
-                    self.data[tstamp]["pose"] = {}
-                if "acceleration" not in self.data:
-                    self.data[tstamp]["acceleration"] = {}
-                self.data[tstamp]["acceleration"] = self.imuMsg2dict(imu_msg)[tstamp]["acceleration"]
-                self.data[tstamp]["pose"] = self.np2dictgen(tstamp, singlePosenp)[tstamp]["pose"]
+            if tag_msg.detections:
+                self.tags = tag_msg.detections
+                tstamp = str(tag_msg.header.stamp)
+                for i in self.tags:
+                    self.tagsDict.update({i.id:{"pose":{ "position":{ "x": i.pose.pose.pose.position.x, "y":i.pose.pose.pose.position.y, "z":i.pose.pose.pose.position.z }, "orientation":{ "x":i.pose.pose.pose.orientation.x, "y":i.pose.pose.pose.orientation.y, "z":i.pose.pose.pose.orientation.z, "w":i.pose.pose.pose.orientation.w }}}})
+                self.detected = True
+                
+                if self.initialize is True:
+                    time.sleep(1)
+                    self.setHomePose(self.tagsDict)
+                    self.initialize = False
+                    rospy.loginfo("Home position set success!")
+                
+                if self.record is True:
+                    FPose = {}
+                    for i in self.home:
+                        if i in self.tagsDict:
+                            FPose.update(self.np2dictspec(i, np.matmul(tform.inverse_matrix(self.dict2np(self.home[i])), self.dict2np(self.tagsDict[i]))))
+                        
+                    singlePosenp = self.getCentroidPose(FPose)
+                    if tstamp not in self.data:
+                        self.data[tstamp] = {}
+                    if "pose" not in self.data:
+                        self.data[tstamp]["pose"] = {}
+                    self.data[tstamp]["pose"] = self.np2dictgen(tstamp, singlePosenp)[tstamp]["pose"]
 
-            # if self.write is True:
-            #     pdData = pd.DataFrame(self.data)
-            #     rospy.loginfo("saving file.....")
-            #     pdData.to_csv("~/catkin_ws/src/shakebot_perception/scripts/recorded.csv")
-            #     self.write = False
-            #     rospy.loginfo("exiting")
+                # if self.write is True:
+                #     pdData = pd.DataFrame(self.data)
+                #     rospy.loginfo("saving file.....")
+                #     pdData.to_csv("~/catkin_ws/src/shakebot_perception/scripts/recorded.csv")
+                #     self.write = False
+                #     rospy.loginfo("exiting")
+        else:
+            pass
     
     def execute_cb(self, goal):
         success=True
@@ -126,11 +134,18 @@ class data_acquisition:
                     self.record = False
                     self.write = True
                     if self.write is True:
-                        pdData = pd.DataFrame(self.data)
                         rospy.loginfo("saving file.....")
-                        pdData.to_csv("~/catkin_ws/src/shakebot_perception/scripts/recorded.csv")
+                        fname = time.strftime("recorded_%m_%d_%y_%H_%M_%S", time.localtime())+".json"
+                        outfile = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/scripts/" + fname
+                        # print(self.data)
+                        with open(outfile, "w") as f:
+                            json_object = json.dumps(self.data, indent=4)
+                            f.write(json_object)
+                            f.close()
+                            
+                        # pdData.to_csv("~/catkin_ws/src/shakebot_perception/scripts/"+fname)
                         self.write = False
-                        rospy.loginfo("exiting")
+                        rospy.loginfo("save complete")
                     self.result.recorder_result = True
                     self.a_server.set_succeeded(self.result)
                     published = False
@@ -147,10 +162,11 @@ class data_acquisition:
         
     
 if __name__=="__main__":
-    try:
-        s = data_acquisition()
-        s.main()
-    except Exception as e:
-        print(e)
-    # s = data_acquisition()
-    # s.main()
+    # try:
+    #     s = data_acquisition()
+    #     s.main()
+    # except Exception as e:
+    #     print(e)
+    s = data_acquisition()
+    s.main()
+    # print(time.strftime("recorded_%m_%d_%y_%H_%M_%S", time.localtime())+".csv")

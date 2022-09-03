@@ -1,6 +1,6 @@
 apriltag-imgs
 .vscode
-recorded.csv
+recorded*
 perceptionCalib.yaml
 Record.txt
 __pycache__

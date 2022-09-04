@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
-from cProfile import label
-import pandas as pd
+import json
+import os
+import glob
 import numpy as np
 import ast
 import matplotlib.pyplot as plt
@@ -22,22 +23,37 @@ class velocity_calc:
         df.set_index(np.arange(1, df.shape[0] + 1), inplace=True)
         return df
     
-    def extractData(self, var, df):
-        data=[]
+    def extractData(self, var, data):
+        ex_data=[]
         if var == "posx":
-            for i in range(1,len(df)):
-                x = ast.literal_eval(df["pose"][i])
-                data.append([x["position"]["x"], df["timestamp"][i]])
+            baseTime = 0
+            for tstamp, value in data.items():
+                if "pose" in value:
+                    if len(ex_data) == 0:
+                        baseTime = tstamp
+                        ex_data.append([0, value["pose"]["position"]["x"]])
+                    else:
+                        ex_data.append([timedelta(microseconds=(int(tstamp) - int(baseTime))/1000).total_seconds(), value["pose"]["position"]["x"]])
         
         elif var == "posy":
-            for i in range(1,len(df)):
-                x = ast.literal_eval(df["pose"][i])
-                data.append([x["position"]["y"], df["timestamp"][i]])
-        
+            baseTime = 0
+            for tstamp, value in data.items():
+                if "pose" in value:
+                    if len(ex_data) == 0:
+                        baseTime = tstamp
+                        ex_data.append([0, value["pose"]["position"]["y"]])
+                    else:
+                        ex_data.append([timedelta(microseconds=(int(tstamp) - int(baseTime))/1000).total_seconds(), value["pose"]["position"]["y"]])
+                    
         elif var == "posz":
-            for i in range(1,len(df)):
-                x = ast.literal_eval(df["pose"][i])
-                data.append([x["position"]["z"], df["timestamp"][i]])
+            baseTime = 0
+            for tstamp, value in data.items():
+                if "pose" in value:
+                    if len(ex_data) == 0:
+                        baseTime = tstamp
+                        ex_data.append([0, value["pose"]["position"]["z"]])
+                    else:
+                        ex_data.append([timedelta(microseconds=(int(tstamp) - int(baseTime))/1000).total_seconds(), value["pose"]["position"]["z"]])
         
         # elif var == "qx":
         #     for i in range(1,len(df)):
@@ -60,21 +76,36 @@ class velocity_calc:
         #         data.append(x["orientation"]["w"])
     
         elif var == "accx":
-            for i in range(1,len(df)):
-                x = ast.literal_eval(df["acceleration"][i])
-                data.append([x["x"], df["timestamp"][i]])
-                
+            baseTime = 0
+            for tstamp, value in data.items():
+                if "acceleration" in value:
+                    if len(ex_data) == 0:
+                        baseTime = tstamp
+                        ex_data.append([0, value["acceleration"]["x"]])
+                    else:
+                        ex_data.append([timedelta(microseconds=(int(tstamp) - int(baseTime))/1000).total_seconds(), value["acceleration"]["x"]])
+                    
         elif var == "accy":
-            for i in range(1,len(df)):
-                x = ast.literal_eval(df["acceleration"][i])
-                data.append([x["y"], df["timestamp"][i]])
+            baseTime = 0
+            for tstamp, value in data.items():
+                if "acceleration" in value:
+                    if len(ex_data) == 0:
+                        baseTime = tstamp
+                        ex_data.append([0, value["acceleration"]["y"]])
+                    else:
+                        ex_data.append([timedelta(microseconds=(int(tstamp) - int(baseTime))/1000).total_seconds(), value["acceleration"]["y"]])
                 
         elif var == "accz":
-            for i in range(1,len(df)):
-                x = ast.literal_eval(df["acceleration"][i])
-                data.append([x["z"], df["timestamp"][i]])
+            baseTime = 0
+            for tstamp, value in data.items():
+                if "acceleration" in value:
+                    if len(ex_data) == 0:
+                        baseTime = tstamp
+                        ex_data.append([0, value["acceleration"]["z"]])
+                    else:
+                        ex_data.append([timedelta(microseconds=(int(tstamp) - int(baseTime))/1000).total_seconds(), value["acceleration"]["z"]])
                 
-        return data
+        return ex_data
 
     def cal_time_period(self, lst):
         print(lst[-1], lst[0])
@@ -83,13 +114,19 @@ class velocity_calc:
         return t
     
     def plot(self, data, labels):
-        f = plt.figure(dpi=300)
-        plt.xlabel("time (sec)")
-        plt.ylabel("acc (m/s^2)")
-        for i, label in zip(data,labels):
-            plt.plot([x[1] for x in i], [x[0] for x in i], label=label)
-        plt.legend()
+        fig, axs = plt.subplots(3)
+        # axs[0].plot([x[0] for x in data[0]], [x[1] for x in data[0]], label=labels[0])
+        # #     axs[idx].set(xlabel="time (s)", ylabel=label)
+        for idx, i, label in zip(range(len(data)),data,labels):
+            axs[idx].plot([x[0] for x in i], [x[1] for x in i], label=label)
+            axs[idx].set(xlabel="time (s)", ylabel=label)
         plt.show()
+        
+    def read_data(self, file):
+        with open(file, "r") as f:
+            data = json.load(f)
+            f.close()
+        return data
         
     def butter_lowpass_filter(self, sample_data, cutoff, fs, order, n, ):
         data = sample_data[:n]
@@ -101,28 +138,24 @@ class velocity_calc:
         return y
     
     def main(self):
-        self.data = pd.read_csv("~/catkin_ws/src/shakebot_perception/scripts/recorded.csv")
-        self.data = self.format_pd(self.data)
+        fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/scripts/record*"))[-3]
+        self.data = self.read_data(fname)
         posx = self.extractData("posx", self.data)
         # posy = self.extractData("posy", self.data)
         # posz = self.extractData("posz", self.data)
-        # qx = self.extractData("qx", self.data)
-        # qy = self.extractData("qy", self.data)
-        # qz = self.extractData("qz", self.data)
-        # qw = self.extractData("qw", self.data)
         # accx = self.extractData("accx", self.data)
         accy = self.extractData("accy", self.data)
         # accz = self.extractData("accz", self.data)
-        
+
         # T = self.cal_time_period(sorted(self.data["timestamp"]))        # Sample period
-        # print(T)
+        # print(T);
         # fs = 40       # Accelerometer sampling rate, Hz
         # cutoff = 30     # desired cutoff frequency of the filter, Hz, slightly higher than actual 30 Hz 
         # order = 2       # butterworth filter order
         # n = int(T * fs) # total number of samples
 
         # filtered_acc = self.butter_lowpass_filter(accy, cutoff, fs, order, n)
-        self.plot([posx[:], accy[:]], ["position", "acceleration"])
+        self.plot([accy[:], posx[:]], ["acceleration", "position"])
     
 if __name__=="__main__":
     s = velocity_calc()

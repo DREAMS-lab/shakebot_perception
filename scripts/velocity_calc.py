@@ -134,10 +134,12 @@ class velocity_calc:
         fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/scripts/record*"))[-1]
         self.data = self.read_data(fname)
         posx = self.extractData("posx", self.data)
+        # posx = sorted(posx, key=lambda x:x[0])
         # posy = self.extractData("posy", self.data)
         # posz = self.extractData("posz", self.data)
         # accx = self.extractData("accx", self.data)
         accy = self.extractData("accy", self.data)
+        # accy = sorted(accy, key=lambda x:x[0])
         # accz = self.extractData("accz", self.data)
         
         # displacement processing to get velocity
@@ -148,18 +150,21 @@ class velocity_calc:
         
         # acceleration processing to get velocity
         T = [x[0] for x in accy][-1]        # Sample period
-        fs = 40           # Accelerometer sampling rate, Hz
-        cutoff = 10       # desired cutoff frequency of the filter, Hz, slightly higher than actual 30 Hz 
+        fs = 80           # Accelerometer sampling rate, Hz
+        cutoff = 30       # desired cutoff frequency of the filter, Hz, slightly higher than actual 30 Hz 
         order = 2         # butterworth filter order
         n = int(T * fs)   # total number of samples
+        
         acc_tstamp = [x[0] for x in accy]
         acc_tbf = [x[1] for x in accy]
         filtered_acc = self.butter_lowpass_filter(acc_tbf, cutoff, fs, order, n)
+        acc_plot = [[i,j] for i,j in zip(acc_tstamp[:n], filtered_acc)]
         vel_acc = self.get_velocity_facc(acc_tstamp[:n], filtered_acc)
         vel_acc_plot = [[i,j] for i,j in zip(acc_tstamp[:n], vel_acc)]
         
         # ploting data
-        self.plot([accy[:], posx[:], vel_acc_plot[:], vel_pos_plot[:]], ["acceleration", "position", "velocity_acc", "velocity_pos"])
+        # self.plot([accy[:], posx[:], vel_acc_plot[:], vel_pos_plot[:]], ["acceleration", "position", "velocity_acc", "velocity_pos"])
+        self.plot([acc_plot[:], posx[:], vel_acc_plot[:], vel_pos_plot[:]], ["acceleration", "position", "velocity_acc", "velocity_pos"])
     
 if __name__=="__main__":
     s = velocity_calc()

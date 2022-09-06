@@ -38,6 +38,8 @@ In addition, will create a node for imu and will start the imu_pub publisher to 
 		</node>
 
 		<node pkg="image_proc" type="image_proc" name="camera_processor" />
+
+		<node name="dynamic_reconfigure_load" pkg="dynamic_reconfigure" type="dynparam" args="load /camera/camera_nodelet $(find shakebot_perception)/config/camera_fps_config.yaml" />
 	</group>
 
 	<!-- point grey camera node section ends -->

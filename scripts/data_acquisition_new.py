@@ -12,6 +12,7 @@ import message_filters as mf
 import actionlib
 from shakebot_perception.msg import recorder_automationResult, recorder_automationAction
 import json
+from velocity_calc import velocity_calc
 
 class data_acquisition:
     def __init__(self):
@@ -64,10 +65,11 @@ class data_acquisition:
     
     def fetchImu(self, imu_msg):
         if self.write is False:
-            tstamp = str(imu_msg.header.stamp)
-            if tstamp not in self.data:
-                self.data[tstamp] = {}
-            self.data[tstamp]["acceleration"]=self.imuMsg2dict(imu_msg)["acceleration"]
+            if self.record is True:
+                tstamp = str(imu_msg.header.stamp)
+                if tstamp not in self.data:
+                    self.data[tstamp] = {}
+                self.data[tstamp]["acceleration"]=self.imuMsg2dict(imu_msg)["acceleration"]
         else:
             pass
     
@@ -97,8 +99,6 @@ class data_acquisition:
                     singlePosenp = self.getCentroidPose(FPose)
                     if tstamp not in self.data:
                         self.data[tstamp] = {}
-                    if "pose" not in self.data:
-                        self.data[tstamp]["pose"] = {}
                     self.data[tstamp]["pose"] = self.np2dictgen(tstamp, singlePosenp)[tstamp]["pose"]
 
                 # if self.write is True:
@@ -145,10 +145,15 @@ class data_acquisition:
                             
                         # pdData.to_csv("~/catkin_ws/src/shakebot_perception/scripts/"+fname)
                         self.write = False
-                        rospy.loginfo("save complete")
+                        self.data = {}
+                        rospy.loginfo("save complete.")
                     self.result.recorder_result = True
                     self.a_server.set_succeeded(self.result)
                     published = False
+                    rospy.loginfo("Plotting recorded data.")
+                    s = velocity_calc()
+                    s.main()
+                    rospy.loginfo("Publish goal once again to start recording.")
     
     def main(self):
         rospy.Subscriber("/apriltag_detection/tag_detections", AprilTagDetectionArray, self.setBedPose)

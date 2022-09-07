@@ -23,7 +23,7 @@ class data_acquisition:
         self.detected = False
         self.record = False
         self.write = False
-        self.initialize = False
+        self.initialize = True
         self.a_server = actionlib.SimpleActionServer("shakebot_recorder_as",recorder_automationAction, execute_cb=self.execute_cb, auto_start=False)
         self.a_server.start()
         self.result = recorder_automationResult()
@@ -89,6 +89,7 @@ class data_acquisition:
                     self.setHomePose(self.tagsDict)
                     self.initialize = False
                     rospy.loginfo("Home position set success!")
+                    rospy.loginfo("publish goal to start recording!!")
                 
                 if self.record is True:
                     FPose = {}
@@ -123,7 +124,6 @@ class data_acquisition:
             if success:
                 if self.goal_recorder_state is True:
                     rospy.loginfo("started recording")
-                    self.initialize = True
                     self.record = True
                     self.result.recorder_result = True
                     self.a_server.set_succeeded(self.result)
@@ -165,7 +165,6 @@ class data_acquisition:
         # imu_sub = mf.Subscriber("/imu_data", Imu)
         # ts = mf.ApproximateTimeSynchronizer([tag_sub, imu_sub],20,5,1)
         # ts.registerCallback(self.setBedPose)
-        rospy.loginfo("publish goal to start recording!!")
         rospy.spin()
         
     

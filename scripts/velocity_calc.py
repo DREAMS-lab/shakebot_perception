@@ -151,7 +151,7 @@ class velocity_calc:
         return y
     
     def main(self):
-        fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/scripts/record*"))[-6]
+        fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/scripts/record*"))[-1]
         self.data = self.read_data(fname)
         posx = self.extractData("posx", self.data)
         # posx = sorted(posx, key=lambda x:x[0])
@@ -164,7 +164,7 @@ class velocity_calc:
         
         # displacement processing to get velocity
         T_pos = [x[0] for x in posx][-1]        # Sample period
-        fs_pos = 60           # Accelerometer sampling rate, Hz
+        fs_pos = 25           # Accelerometer sampling rate, Hz
         cutoff_pos = 5       # desired cutoff frequency of the filter, Hz, slightly higher than actual 30 Hz 
         order_pos = 2         # butterworth filter order
         n_pos = int(T_pos * fs_pos)   # total number of samples
@@ -189,15 +189,18 @@ class velocity_calc:
         acc_tbf = [x[1] for x in accy]
         filtered_acc = self.butter_lowpass_filter(acc_tbf, cutoff_acc, fs_acc, order_acc, n_acc)
         acc_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], filtered_acc)]
-        vel_acc = self.get_velocity_facc(acc_tstamp[:n_acc], filtered_acc)
+        vel_acc = self.get_velocity_facc(acc_tstamp[:n_acc], [x*9.8 for x in filtered_acc])
         vel_acc_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], vel_acc)]
         
         # ploting data
         # self.plot([accy[:], posx[:], vel_acc_plot[:], vel_pos_plot[:]], ["acceleration", "position", "velocity_acc", "velocity_pos"])
         self.plot([acc_plot[:], pos_plot[:], vel_acc_plot[:], vel_pos_plot[:]], ["acceleration", "position", "velocity_acc", "velocity_pos"])
-        plt.plot(pos_tstamp,vel_pos)
-        plt.show()
+        # plt.plot(acc_tstamp[:n_acc],filtered_acc)
+        # plt.show()
     
 if __name__=="__main__":
-    s = velocity_calc()
-    s.main()
+    try:
+        s = velocity_calc()
+        s.main()
+    except Exception as e:
+        print(e)

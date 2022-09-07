@@ -151,8 +151,11 @@ class data_acquisition:
                     self.a_server.set_succeeded(self.result)
                     published = False
                     rospy.loginfo("Plotting recorded data.")
-                    s = velocity_calc()
-                    s.main()
+                    try:
+                        s = velocity_calc()
+                        s.main()
+                    except Exception as e:
+                        print(e)
                     rospy.loginfo("Publish goal once again to start recording.")
     
     def main(self):
@@ -167,11 +170,11 @@ class data_acquisition:
         
     
 if __name__=="__main__":
-    # try:
-    #     s = data_acquisition()
-    #     s.main()
-    # except Exception as e:
-    #     print(e)
-    s = data_acquisition()
-    s.main()
+    try:
+        s = data_acquisition()
+        s.main()
+    except Exception as e:
+        print(e)
+    # s = data_acquisition()
+    # s.main()
     # print(time.strftime("recorded_%m_%d_%y_%H_%M_%S", time.localtime())+".csv")

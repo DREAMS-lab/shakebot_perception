@@ -151,7 +151,7 @@ class velocity_calc:
         return y
     
     def main(self):
-        fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/scripts/record*"))[-1]
+        fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/record*"))[-1]
         self.data = self.read_data(fname)
         posx = self.extractData("posx", self.data)
         # posx = sorted(posx, key=lambda x:x[0])

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import json
+from math import sqrt
 import os
 import glob
 import numpy as np
@@ -25,65 +26,91 @@ class velocity_calc:
     
     def extractData(self, var, data):
         ex_data=[]
-        if var == "posx":
-            baseTime = 0
+        if var == "pos":
+            basetime = 0
             for tstamp, value in data.items():
                 if "pose" in value:
+                    print(value["pose"]["position"]["x"], value["pose"]["position"]["y"])
+                    px = value["pose"]["position"]["x"]
+                    py = value["pose"]["position"]["y"]
                     if len(ex_data) == 0:
                         baseTime = tstamp
-                        ex_data.append([0, value["pose"]["position"]["x"]])
+                        ex_data.append([0, sqrt(px**2 + py**2)])
                     else:
-                        ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["pose"]["position"]["x"]])
+                        ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), sqrt(px**2 + py**2)])
+                        
+        elif var == "acc":
+            baseTime = 0
+            for tstamp, value in data.items():
+                if "acceleration" in value:
+                    print(value["acceleration"]["x"], value["acceleration"]["y"])
+                    ax = value["acceleration"]["x"] * 9.81
+                    ay = value["acceleration"]["y"] * 9.81
+                    if len(ex_data) == 0:
+                        baseTime = tstamp
+                        ex_data.append([0, sqrt(ax**2 + ay**2)])
+                    else:
+                        ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), sqrt(ax**2 + ay**2)])
+            
+        # if var == "posx":
+        #     baseTime = 0
+        #     for tstamp, value in data.items():
+        #         if "pose" in value:
+        #             if len(ex_data) == 0:
+        #                 baseTime = tstamp
+        #                 ex_data.append([0, value["pose"]["position"]["x"]])
+        #             else:
+        #                 ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["pose"]["position"]["x"]])
         
-        elif var == "posy":
-            baseTime = 0
-            for tstamp, value in data.items():
-                if "pose" in value:
-                    if len(ex_data) == 0:
-                        baseTime = tstamp
-                        ex_data.append([0, value["pose"]["position"]["y"]])
-                    else:
-                        ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["pose"]["position"]["y"]])
+        # elif var == "posy":
+        #     baseTime = 0
+        #     for tstamp, value in data.items():
+        #         if "pose" in value:
+        #             if len(ex_data) == 0:
+        #                 baseTime = tstamp
+        #                 ex_data.append([0, value["pose"]["position"]["y"]])
+        #             else:
+        #                 ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["pose"]["position"]["y"]])
                     
-        elif var == "posz":
-            baseTime = 0
-            for tstamp, value in data.items():
-                if "pose" in value:
-                    if len(ex_data) == 0:
-                        baseTime = tstamp
-                        ex_data.append([0, value["pose"]["position"]["z"]])
-                    else:
-                        ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["pose"]["position"]["z"]])
+        # elif var == "posz":
+        #     baseTime = 0
+        #     for tstamp, value in data.items():
+        #         if "pose" in value:
+        #             if len(ex_data) == 0:
+        #                 baseTime = tstamp
+        #                 ex_data.append([0, value["pose"]["position"]["z"]])
+        #             else:
+        #                 ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["pose"]["position"]["z"]])
     
-        elif var == "accx":
-            baseTime = 0
-            for tstamp, value in data.items():
-                if "acceleration" in value:
-                    if len(ex_data) == 0:
-                        baseTime = tstamp
-                        ex_data.append([0, value["acceleration"]["x"]])
-                    else:
-                        ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["acceleration"]["x"]])
+        # elif var == "accx":
+        #     baseTime = 0
+        #     for tstamp, value in data.items():
+        #         if "acceleration" in value:
+        #             if len(ex_data) == 0:
+        #                 baseTime = tstamp
+        #                 ex_data.append([0, value["acceleration"]["x"]])
+        #             else:
+        #                 ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["acceleration"]["x"]])
                     
-        elif var == "accy":
-            baseTime = 0
-            for tstamp, value in data.items():
-                if "acceleration" in value:
-                    if len(ex_data) == 0:
-                        baseTime = tstamp
-                        ex_data.append([0, value["acceleration"]["y"]])
-                    else:
-                        ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["acceleration"]["y"]])
+        # elif var == "accy":
+        #     baseTime = 0
+        #     for tstamp, value in data.items():
+        #         if "acceleration" in value:
+        #             if len(ex_data) == 0:
+        #                 baseTime = tstamp
+        #                 ex_data.append([0, value["acceleration"]["y"]])
+        #             else:
+        #                 ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["acceleration"]["y"]])
                 
-        elif var == "accz":
-            baseTime = 0
-            for tstamp, value in data.items():
-                if "acceleration" in value:
-                    if len(ex_data) == 0:
-                        baseTime = tstamp
-                        ex_data.append([0, value["acceleration"]["z"]])
-                    else:
-                        ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["acceleration"]["z"]])
+        # elif var == "accz":
+        #     baseTime = 0
+        #     for tstamp, value in data.items():
+        #         if "acceleration" in value:
+        #             if len(ex_data) == 0:
+        #                 baseTime = tstamp
+        #                 ex_data.append([0, value["acceleration"]["z"]])
+        #             else:
+        #                 ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["acceleration"]["z"]])
                 
         return ex_data
     
@@ -151,21 +178,26 @@ class velocity_calc:
         return y
     
     def main(self):
-        fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/record*"))[-1]
+        # fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/record*"))[-2]
+        # recorded_09_07_22_12_49_28
+        fname = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/recorded_09_07_22_12_49_28.json"
+
+        print(fname)
         self.data = self.read_data(fname)
-        posx = self.extractData("posx", self.data)
+        posx = self.extractData("pos", self.data)
+        print(posx)
         # posx = sorted(posx, key=lambda x:x[0])
         # posy = self.extractData("posy", self.data)
         # posz = self.extractData("posz", self.data)
         # accx = self.extractData("accx", self.data)
-        accy = self.extractData("accy", self.data)
+        accy = self.extractData("acc", self.data)
         # accy = sorted(accy, key=lambda x:x[0])
         # accz = self.extractData("accz", self.data)
         
         # displacement processing to get velocity
         T_pos = [x[0] for x in posx][-1]        # Sample period
         fs_pos = 25           # Accelerometer sampling rate, Hz
-        cutoff_pos = 5       # desired cutoff frequency of the filter, Hz, slightly higher than actual 30 Hz 
+        cutoff_pos = 10       # desired cutoff frequency of the filter, Hz, slightly higher than actual 30 Hz 
         order_pos = 2         # butterworth filter order
         n_pos = int(T_pos * fs_pos)   # total number of samples
         
@@ -189,7 +221,7 @@ class velocity_calc:
         acc_tbf = [x[1] for x in accy]
         filtered_acc = self.butter_lowpass_filter(acc_tbf, cutoff_acc, fs_acc, order_acc, n_acc)
         acc_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], filtered_acc)]
-        vel_acc = self.get_velocity_facc(acc_tstamp[:n_acc], [x*9.8 for x in filtered_acc])
+        vel_acc = self.get_velocity_facc(acc_tstamp[:n_acc], [x for x in filtered_acc])
         vel_acc_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], vel_acc)]
         
         # ploting data
@@ -199,8 +231,11 @@ class velocity_calc:
         # plt.show()
     
 if __name__=="__main__":
-    try:
-        s = velocity_calc()
-        s.main()
-    except Exception as e:
-        print(e)
+    # try:
+    #     s = velocity_calc()
+    #     s.main()
+    # except Exception as e:
+    #     print(e)
+        
+    s = velocity_calc()
+    s.main()

@@ -30,7 +30,7 @@ class velocity_calc:
             basetime = 0
             for tstamp, value in data.items():
                 if "pose" in value:
-                    print(value["pose"]["position"]["x"], value["pose"]["position"]["y"])
+                    # print(value["pose"]["position"]["x"], value["pose"]["position"]["y"])
                     px = value["pose"]["position"]["x"]
                     py = value["pose"]["position"]["y"]
                     if len(ex_data) == 0:
@@ -43,7 +43,7 @@ class velocity_calc:
             baseTime = 0
             for tstamp, value in data.items():
                 if "acceleration" in value:
-                    print(value["acceleration"]["x"], value["acceleration"]["y"])
+                    # print(value["acceleration"]["x"], value["acceleration"]["y"])
                     ax = value["acceleration"]["x"] * 9.81
                     ay = value["acceleration"]["y"] * 9.81
                     if len(ex_data) == 0:
@@ -123,7 +123,7 @@ class velocity_calc:
                     axs[2].scatter([x[0] for x in i], [x[1] for x in i], label="velocity_acc", marker="x")
                     count+=1
                 else:
-                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label="velocity_pos", marker="x")
+                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label="velocity_pos", marker="o")
                 axs[2].set(xlabel="time (s)", ylabel="velocity")
             else:
                 axs[idx].scatter([x[0] for x in i], [x[1] for x in i], label=label, marker="x")
@@ -178,31 +178,31 @@ class velocity_calc:
         return y
     
     def main(self):
-        # fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/record*"))[-2]
+        # fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/record*"))[-5]
         # recorded_09_07_22_12_49_28
         fname = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/recorded_09_07_22_12_49_28.json"
 
         print(fname)
         self.data = self.read_data(fname)
-        posx = self.extractData("pos", self.data)
-        print(posx)
+        pos = self.extractData("pos", self.data)
+        # print(pos)
         # posx = sorted(posx, key=lambda x:x[0])
         # posy = self.extractData("posy", self.data)
         # posz = self.extractData("posz", self.data)
         # accx = self.extractData("accx", self.data)
-        accy = self.extractData("acc", self.data)
+        acc = self.extractData("acc", self.data)
         # accy = sorted(accy, key=lambda x:x[0])
         # accz = self.extractData("accz", self.data)
         
         # displacement processing to get velocity
-        T_pos = [x[0] for x in posx][-1]        # Sample period
+        T_pos = [x[0] for x in pos][-1]        # Sample period
         fs_pos = 25           # Accelerometer sampling rate, Hz
         cutoff_pos = 10       # desired cutoff frequency of the filter, Hz, slightly higher than actual 30 Hz 
         order_pos = 2         # butterworth filter order
         n_pos = int(T_pos * fs_pos)   # total number of samples
         
-        pos_tstamp = [x[0] for x in posx]
-        pos_tbf = [x[1] for x in posx]
+        pos_tstamp = [x[0] for x in pos]
+        pos_tbf = [x[1] for x in pos]
         filtered_pos = self.butter_lowpass_filter(pos_tbf, cutoff_pos, fs_pos, order_pos, n_pos)
         pos_plot = [[i,j] for i,j in zip(pos_tstamp[:n_pos], filtered_pos)]
         vel_pos = self.get_velocity_fpos(pos_tstamp[:n_pos], filtered_pos)
@@ -211,14 +211,14 @@ class velocity_calc:
         # vel_pos_plot = [[i,j] for i,j in zip(pos_tstamp, vel_pos)]
         
         # acceleration processing to get velocity
-        T_acc = [x[0] for x in accy][-1]        # Sample period
+        T_acc = [x[0] for x in acc][-1]        # Sample period
         fs_acc = 80           # Accelerometer sampling rate, Hz
         cutoff_acc = 30       # desired cutoff frequency of the filter, Hz, slightly higher than actual 30 Hz 
         order_acc = 2         # butterworth filter order
         n_acc = int(T_acc * fs_acc)   # total number of samples
         
-        acc_tstamp = [x[0] for x in accy]
-        acc_tbf = [x[1] for x in accy]
+        acc_tstamp = [x[0] for x in acc]
+        acc_tbf = [x[1] for x in acc]
         filtered_acc = self.butter_lowpass_filter(acc_tbf, cutoff_acc, fs_acc, order_acc, n_acc)
         acc_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], filtered_acc)]
         vel_acc = self.get_velocity_facc(acc_tstamp[:n_acc], [x for x in filtered_acc])

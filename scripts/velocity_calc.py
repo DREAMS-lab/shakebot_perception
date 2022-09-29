@@ -26,41 +26,41 @@ class velocity_calc:
     
     def extractData(self, var, data):
         ex_data=[]
-        if var == "pos":
-            basetime = 0
-            for tstamp, value in data.items():
-                if "pose" in value:
-                    # print(value["pose"]["position"]["x"], value["pose"]["position"]["y"])
-                    px = value["pose"]["position"]["x"]
-                    py = value["pose"]["position"]["y"]
-                    if len(ex_data) == 0:
-                        baseTime = tstamp
-                        ex_data.append([0, sqrt(px**2 + py**2)])
-                    else:
-                        ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), sqrt(px**2 + py**2)])
-                        
-        elif var == "acc":
-            baseTime = 0
-            for tstamp, value in data.items():
-                if "acceleration" in value:
-                    # print(value["acceleration"]["x"], value["acceleration"]["y"])
-                    ax = value["acceleration"]["x"] * 9.81
-                    ay = value["acceleration"]["y"] * 9.81
-                    if len(ex_data) == 0:
-                        baseTime = tstamp
-                        ex_data.append([0, sqrt(ax**2 + ay**2)])
-                    else:
-                        ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), sqrt(ax**2 + ay**2)])
-            
-        # if var == "posx":
-        #     baseTime = 0
+        # if var == "pos":
+        #     basetime = 0
         #     for tstamp, value in data.items():
         #         if "pose" in value:
+        #             # print(value["pose"]["position"]["x"], value["pose"]["position"]["y"])
+        #             px = value["pose"]["position"]["x"]
+        #             py = value["pose"]["position"]["y"]
         #             if len(ex_data) == 0:
         #                 baseTime = tstamp
-        #                 ex_data.append([0, value["pose"]["position"]["x"]])
+        #                 ex_data.append([0, sqrt(px**2 + py**2)])
         #             else:
-        #                 ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["pose"]["position"]["x"]])
+        #                 ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), sqrt(px**2 + py**2)])
+                        
+        # elif var == "acc":
+        #     baseTime = 0
+        #     for tstamp, value in data.items():
+        #         if "acceleration" in value:
+        #             # print(value["acceleration"]["x"], value["acceleration"]["y"])
+        #             ax = value["acceleration"]["x"] * 9.81
+        #             ay = value["acceleration"]["y"] * 9.81
+        #             if len(ex_data) == 0:
+        #                 baseTime = tstamp
+        #                 ex_data.append([0, sqrt(ax**2 + ay**2)])
+        #             else:
+        #                 ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), sqrt(ax**2 + ay**2)])
+            
+        if var == "pos":
+            baseTime = 0
+            for tstamp, value in data.items():
+                if "pose" in value:
+                    if len(ex_data) == 0:
+                        baseTime = tstamp
+                        ex_data.append([0, value["pose"]["position"]["x"]])
+                    else:
+                        ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["pose"]["position"]["x"]])
         
         # elif var == "posy":
         #     baseTime = 0
@@ -92,15 +92,15 @@ class velocity_calc:
         #             else:
         #                 ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["acceleration"]["x"]])
                     
-        # elif var == "accy":
-        #     baseTime = 0
-        #     for tstamp, value in data.items():
-        #         if "acceleration" in value:
-        #             if len(ex_data) == 0:
-        #                 baseTime = tstamp
-        #                 ex_data.append([0, value["acceleration"]["y"]])
-        #             else:
-        #                 ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["acceleration"]["y"]])
+        elif var == "acc":
+            baseTime = 0
+            for tstamp, value in data.items():
+                if "acceleration" in value:
+                    if len(ex_data) == 0:
+                        baseTime = tstamp
+                        ex_data.append([0, value["acceleration"]["y"]])
+                    else:
+                        ex_data.append([timedelta(microseconds=(float(tstamp) - float(baseTime))/1000).total_seconds(), value["acceleration"]["y"]])
                 
         # elif var == "accz":
         #     baseTime = 0
@@ -178,9 +178,9 @@ class velocity_calc:
         return y
     
     def main(self):
-        # fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/record*"))[-5]
+        fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/record*"))[-1]
         # recorded_09_07_22_12_49_28
-        fname = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/recorded_09_07_22_12_49_28.json"
+        # fname = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/recorded_09_07_22_12_49_28.json"
 
         print(fname)
         self.data = self.read_data(fname)
@@ -218,7 +218,7 @@ class velocity_calc:
         n_acc = int(T_acc * fs_acc)   # total number of samples
         
         acc_tstamp = [x[0] for x in acc]
-        acc_tbf = [x[1] for x in acc]
+        acc_tbf = [x[1]*9.81 for x in acc]
         filtered_acc = self.butter_lowpass_filter(acc_tbf, cutoff_acc, fs_acc, order_acc, n_acc)
         acc_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], filtered_acc)]
         vel_acc = self.get_velocity_facc(acc_tstamp[:n_acc], [x for x in filtered_acc])

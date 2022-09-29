@@ -17,7 +17,7 @@ dictitems:
   format7_roi_width: 0
   format7_x_offset: 0
   format7_y_offset: 0
-  frame_rate: 100.00
+  frame_rate: 25.00
   gain: 0.0
   gamma: 1.0
   groups: !!python/object/new:dynamic_reconfigure.encoding.Config

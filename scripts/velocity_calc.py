@@ -165,7 +165,7 @@ class velocity_calc:
         normal_cutoff = cutoff / nyq
         # Get the filter coefficients 
         b, a = butter(order, normal_cutoff, btype='low', analog=False)
-        y = filtfilt(b, a, data)
+        y = filtfilt(b, a, data, padlen=len(data)-1)
         return y
     
     def butter_highpass_filter(self, sample_data, cutoff, fs, order, n):
@@ -196,13 +196,13 @@ class velocity_calc:
         
         # displacement processing to get velocity
         T_pos = [x[0] for x in pos][-1]        # Sample period
-        fs_pos = 25           # Accelerometer sampling rate, Hz
-        cutoff_pos = 10       # desired cutoff frequency of the filter, Hz, slightly higher than actual 30 Hz 
+        fs_pos = 25          # Accelerometer sampling rate, Hz
+        cutoff_pos = 5       # desired cutoff frequency of the filter, Hz, slightly higher than actual 30 Hz 
         order_pos = 2         # butterworth filter order
         n_pos = int(T_pos * fs_pos)   # total number of samples
         
         pos_tstamp = [x[0] for x in pos]
-        pos_tbf = [x[1] for x in pos]
+        pos_tbf = [x[1]*0.41 for x in pos]
         filtered_pos = self.butter_lowpass_filter(pos_tbf, cutoff_pos, fs_pos, order_pos, n_pos)
         pos_plot = [[i,j] for i,j in zip(pos_tstamp[:n_pos], filtered_pos)]
         vel_pos = self.get_velocity_fpos(pos_tstamp[:n_pos], filtered_pos)

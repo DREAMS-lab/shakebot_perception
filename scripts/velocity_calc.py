@@ -5,7 +5,6 @@ from math import sqrt
 import os
 import glob
 import numpy as np
-import ast
 import matplotlib.pyplot as plt
 from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy.signal import butter, filtfilt
@@ -115,15 +114,20 @@ class velocity_calc:
         return ex_data
     
     def plot(self, data, labels):
-        fig, axs = plt.subplots(len(data)-1)
+        global axs
+        fig, axs = plt.subplots(3)
         count=0
         for idx, i, label in zip(range(len(data)),data,labels):
             if "velocity" in label:
                 if count == 0:
                     axs[2].scatter([x[0] for x in i], [x[1] for x in i], label="velocity_acc", marker="x")
                     count+=1
-                else:
+                elif count == 1:
                     axs[2].scatter([x[0] for x in i], [x[1] for x in i], label="velocity_pos", marker="o")
+                    count+=1
+                else:
+                    axs[2].plot([x[0] for x in i], [x[1] for x in i], label="velocity_estimate", marker="+")
+                    count+=1
                 axs[2].set(xlabel="time (s)", ylabel="velocity")
             else:
                 axs[idx].scatter([x[0] for x in i], [x[1] for x in i], label=label, marker="x")
@@ -143,20 +147,9 @@ class velocity_calc:
         return vel_acc
     
     def get_velocity_fpos(self, tstamp, filtered_disp):
-        # dx = np.diff(filtered_disp)
-        # dt = np.diff(tstamp)
-        # vel_pos = dx/dt
-        # print(vel_pos)
         f = InterpolatedUnivariateSpline(tstamp, filtered_disp, k=1)  # k=1 gives linear interpolation
         fp = f.derivative()
         vel_pos = [fp(i) for i in tstamp]
-        # p1 = filtered_disp[:-1]
-        # p2 = filtered_disp[1:]
-        # t1 = tstamp[:-1]
-        # t2 = tstamp[1:]
-        # dp = np.array(p2)-np.array(p1)
-        # dt = np.array(t2)-np.array(t1)
-        # vel_pos = [i/j for i,j in zip(dp, dt)]
         return vel_pos
                 
     def butter_lowpass_filter(self, sample_data, cutoff, fs, order, n):
@@ -185,14 +178,7 @@ class velocity_calc:
         print(fname)
         self.data = self.read_data(fname)
         pos = self.extractData("pos", self.data)
-        # print(pos)
-        # posx = sorted(posx, key=lambda x:x[0])
-        # posy = self.extractData("posy", self.data)
-        # posz = self.extractData("posz", self.data)
-        # accx = self.extractData("accx", self.data)
         acc = self.extractData("acc", self.data)
-        # accy = sorted(accy, key=lambda x:x[0])
-        # accz = self.extractData("accz", self.data)
         
         # displacement processing to get velocity
         T_pos = [x[0] for x in pos][-1]        # Sample period
@@ -225,17 +211,17 @@ class velocity_calc:
         vel_acc_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], vel_acc)]
         
         # ploting data
-        # self.plot([accy[:], posx[:], vel_acc_plot[:], vel_pos_plot[:]], ["acceleration", "position", "velocity_acc", "velocity_pos"])
-        self.plot([acc_plot[:], pos_plot[:], vel_acc_plot[:], vel_pos_plot[:]], ["acceleration", "position", "velocity_acc", "velocity_pos"])
-        # plt.plot(acc_tstamp[:n_acc],filtered_acc)
-        # plt.show()
-    
+        print(max(len(acc_tstamp[:n_acc]),len(pos_tstamp[:n_pos])))
+        est_model = np.poly1d(np.polyfit(np.array(acc_tstamp[:n_acc]+pos_tstamp[:n_pos]), np.array(vel_acc+vel_pos), 3))
+        vel_est_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], est_model(acc_tstamp[:n_acc]))]
+        self.plot([acc_plot[:], pos_plot[:], vel_acc_plot[:], vel_pos_plot[:], vel_est_plot[:]], ["acceleration (m/s^2)", "position (m)", "velocity_acc", "velocity_pos", "velocity_estimate"])
+
 if __name__=="__main__":
-    # try:
-    #     s = velocity_calc()
-    #     s.main()
-    # except Exception as e:
-    #     print(e)
+    try:
+        s = velocity_calc()
+        s.main()
+    except Exception as e:
+        print(e)
         
-    s = velocity_calc()
-    s.main()
+    # s = velocity_calc()
+    # s.main()

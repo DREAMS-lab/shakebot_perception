@@ -211,7 +211,6 @@ class velocity_calc:
         vel_acc_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], vel_acc)]
         
         # ploting data
-        print(max(len(acc_tstamp[:n_acc]),len(pos_tstamp[:n_pos])))
         est_model = np.poly1d(np.polyfit(np.array(acc_tstamp[:n_acc]+pos_tstamp[:n_pos]), np.array(vel_acc+vel_pos), 3))
         vel_est_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], est_model(acc_tstamp[:n_acc]))]
         self.plot([acc_plot[:], pos_plot[:], vel_acc_plot[:], vel_pos_plot[:], vel_est_plot[:]], ["acceleration (m/s^2)", "position (m)", "velocity_acc", "velocity_pos", "velocity_estimate"])

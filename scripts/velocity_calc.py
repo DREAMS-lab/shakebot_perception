@@ -128,7 +128,7 @@ class velocity_calc:
                 else:
                     axs[2].plot([x[0] for x in i], [x[1] for x in i], label="velocity_estimate", marker="+")
                     count+=1
-                axs[2].set(xlabel="time (s)", ylabel="velocity")
+                axs[2].set(xlabel="time (s)", ylabel="velocity (m/s)")
             else:
                 axs[idx].scatter([x[0] for x in i], [x[1] for x in i], label=label, marker="x")
                 axs[idx].set(xlabel="time (s)", ylabel=label)
@@ -175,7 +175,7 @@ class velocity_calc:
         # recorded_09_07_22_12_49_28
         # fname = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/recorded_09_07_22_12_49_28.json"
 
-        print(fname)
+        # print(fname)
         self.data = self.read_data(fname)
         pos = self.extractData("pos", self.data)
         acc = self.extractData("acc", self.data)

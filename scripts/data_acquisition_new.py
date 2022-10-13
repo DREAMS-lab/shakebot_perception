@@ -161,10 +161,6 @@ class data_acquisition:
     def main(self):
         rospy.Subscriber("/apriltag_detection/tag_detections", AprilTagDetectionArray, self.setBedPose)
         rospy.Subscriber("/imu_data", Imu, self.fetchImu)
-        # tag_sub = mf.Subscriber("/apriltag_detection/tag_detections", AprilTagDetectionArray)
-        # imu_sub = mf.Subscriber("/imu_data", Imu)
-        # ts = mf.ApproximateTimeSynchronizer([tag_sub, imu_sub],20,5,1)
-        # ts.registerCallback(self.setBedPose)
         rospy.spin()
         
     

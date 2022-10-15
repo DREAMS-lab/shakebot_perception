@@ -1,7 +1,9 @@
+#!/usr/bin/python3
+
 import rospy
 from apriltag_ros.msg import AprilTagDetectionArray
 from tf import transformations as tform
-from shakebot_perception.msg import calib_msg
+from shakebot_motion.msg import calib_msg
 import time
 import numpy as np
 from data_acquisition_new import data_acquisition
@@ -51,6 +53,7 @@ class perceptCalib:
                     self.data[self.state]["pose"] = self.np2dictgen(tstamp, singlePosenp)[tstamp]["pose"]
                     self.data[self.state]["bed_length"] = self.bedlength
                     self.capture = False
+                    rospy.loginfo(f"Captured {self.state} state")
         else:
             pass
         
@@ -66,8 +69,8 @@ class perceptCalib:
     def setParams(self, state, bedLength):
         self.state = state
         self.capture = True
-        self.count+=1
         self.bedlength = bedLength
+        self.count+=1
         
     def capturePos(self, msg):
         if msg.left_ls and self.count == 1:
@@ -75,22 +78,23 @@ class perceptCalib:
         elif msg.right_ls and self.count == 2:
             self.setParams("right", msg.bed_length)
         elif msg.bed_position and self.count == 3:
-            self.setParams("right", msg.bed_position)
+            self.setParams("middle", msg.bed_position)
         elif self.count==4 and len(self.data)==3:
             self.write = True
+            rospy.loginfo("calculating and writing parameter")
             self.calculateAndSave()
    
     def main(self):
-        rospy.Subscriber("calibration_parameters", calib_msg, self.capturePos)
+        rospy.Subscriber("/calibration_parameters", calib_msg, self.capturePos)
         rospy.Subscriber("/apriltag_detection/tag_detections", AprilTagDetectionArray, self.setBedPose)
         rospy.spin()
      
 if __name__=="__main__":
-    try:
-        s = perceptCalib()
-        s.main()
-    except Exception as e:
-        print(e)
+    # try:
+    #     s = perceptCalib()
+    #     s.main()
+    # except Exception as e:
+    #     print(e)
         
-    # s = perceptCalib()
-    # s.main()
+    s = perceptCalib()
+    s.main()

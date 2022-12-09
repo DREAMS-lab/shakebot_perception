@@ -32,16 +32,16 @@ class data_acquisition:
         for i in data:
             self.home.update(data)
         
+    def np2tq(self, nparr):
+        t = tform.translation_from_matrix(nparr)
+        q = tform.quaternion_from_matrix(nparr)
+        return (t, q)
+    
     def dict2np(self, dictionary):
         _t = tform.translation_matrix(np.array([dictionary["pose"]["position"]["x"], dictionary["pose"]["position"]["y"], dictionary["pose"]["position"]["z"]]))
         _q = tform.quaternion_matrix(np.array([dictionary["pose"]["orientation"]["x"], dictionary["pose"]["orientation"]["y"], dictionary["pose"]["orientation"]["z"], dictionary["pose"]["orientation"]["w"]]))
         pose = np.dot(_q, _t)
         return pose
-    
-    def np2tq(self, nparr):
-        t = tform.translation_from_matrix(nparr)
-        q = tform.quaternion_from_matrix(nparr)
-        return (t, q)
     
     def getCentroidPose(self, tagDict):
         bed_t = tform.translation_matrix(np.array([mean([tagDict[i]["pose"]["position"]["x"] for i in tagDict]), mean([tagDict[i]["pose"]["position"]["y"] for i in tagDict]), mean([tagDict[i]["pose"]["position"]["z"] for i in tagDict])]))

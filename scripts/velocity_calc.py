@@ -14,6 +14,14 @@ from datetime import timedelta
 class velocity_calc:
     def __init__(self):
         self.data = {}
+        self.alpha = self.readAlpha()/1000
+        
+    def readAlpha(self):
+        outf = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/config/perceptionCalib.yaml"
+        with open(outf,"r") as f:
+            param = f.read()
+            param = float(param.strip('[').strip("]"))
+        return param
         
     def format_pd(self, df):
         df = df.transpose()
@@ -188,7 +196,7 @@ class velocity_calc:
         n_pos = int(T_pos * fs_pos)   # total number of samples
         
         pos_tstamp = [x[0] for x in pos]
-        pos_tbf = [x[1]*0.41 for x in pos]
+        pos_tbf = [x[1]*self.alpha for x in pos]
         filtered_pos = self.butter_lowpass_filter(pos_tbf, cutoff_pos, fs_pos, order_pos, n_pos)
         pos_plot = [[i,j] for i,j in zip(pos_tstamp[:n_pos], filtered_pos)]
         vel_pos = self.get_velocity_fpos(pos_tstamp[:n_pos], filtered_pos)

@@ -56,6 +56,15 @@ follow the procedure to setup communication in shakebot manual for shakebot hard
 
 Now, for camera frame rate configuration open [camera_fps_config.yaml](./config/camera_fps_config.yaml) file. Find a parameter `frame_rate` and change the value according to the requirement. we kept its value as 100.
 
+## Calibration
+The calibration process is important in order to get the data in correct units. This process is automated calibration process. Follow steps below in master machine
+
+```bash
+roslaunch shakebot_perception aprilTagCalib.launch
+```
+
+Now wait for the slave machine to start calibration as it will send the data to master and both the calibration will be done simultaneously.
+
 ## Quickstart
 We have used apriltag_ros package for apriltag detection. The inputs for this package are `/camera/imge_rect` and `/camera/camera_info` topics. However, the outputs will be `/tf`, `/tag_detections` and `/tag_detections_image` topics.
 

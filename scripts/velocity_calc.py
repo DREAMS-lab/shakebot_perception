@@ -17,7 +17,8 @@ class velocity_calc:
         self.alpha = self.readAlpha()/1000
         
     def readAlpha(self):
-        outf = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/config/perceptionCalib.yaml"
+        # outf = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/config/perceptionCalib.yaml"     # Use this for linux
+        outf = "config\perceptionCalib.yaml"       # Use this for Windows
         with open(outf,"r") as f:
             param = f.read()
             param = float(param.strip('[').strip("]"))
@@ -128,19 +129,26 @@ class velocity_calc:
         for idx, i, label in zip(range(len(data)),data,labels):
             if "velocity" in label:
                 if count == 0:
-                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label="velocity_acc", marker="x")
+                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$V_A$', marker="x")
                     count+=1
                 elif count == 1:
-                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label="velocity_pos", marker="o")
+                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$V_D$', marker="o")
                     count+=1
                 else:
-                    axs[2].plot([x[0] for x in i], [x[1] for x in i], label="velocity_estimate", marker="+")
+                    axs[2].plot([x[0] for x in i], [x[1] for x in i], label=r'$V$')
                     count+=1
-                axs[2].set(xlabel="time (s)", ylabel="velocity (m/s)")
+                axs[2].set(xlabel=r"time ($s$)", ylabel=r"velocity ($m/s$)")
             else:
-                axs[idx].scatter([x[0] for x in i], [x[1] for x in i], label=label, marker="x")
-                axs[idx].set(xlabel="time (s)", ylabel=label)
-        plt.legend()
+                if "acc" in label:
+                    axs[idx].scatter([x[0] for x in i], [x[1] for x in i], label=label, marker="x")
+                    axs[idx].set(ylabel=label)
+                    axs[idx].grid(linestyle="dashdot")
+                else:
+                    axs[idx].scatter([x[0] for x in i], [x[1]*100 for x in i], label=label, marker="x")
+                    axs[idx].set(ylabel=label)
+                    axs[idx].grid(linestyle="dashdot")
+        plt.legend(loc="upper right", prop={"size":5})
+        plt.grid(linestyle="dashdot")
         plt.show()
         
     def read_data(self, file):
@@ -179,9 +187,10 @@ class velocity_calc:
         return y
     
     def main(self):
-        fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/record*"))[-1]
+        # fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/record*"))[-1]
         # recorded_09_07_22_12_49_28
-        # fname = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/recorded_09_07_22_12_49_28.json"
+        # fname = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/recorded_09_07_22_12_49_28.json"       # Use this for linux
+        fname = "data\\recorded_09_07_22_12_49_28.json"      # Use this for Windows
 
         # print(fname)
         self.data = self.read_data(fname)
@@ -221,7 +230,7 @@ class velocity_calc:
         # ploting data
         est_model = np.poly1d(np.polyfit(np.array(acc_tstamp[:n_acc]+pos_tstamp[:n_pos]), np.array(vel_acc+vel_pos), 3))
         vel_est_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], est_model(acc_tstamp[:n_acc]))]
-        self.plot([acc_plot[:], pos_plot[:], vel_acc_plot[:], vel_pos_plot[:], vel_est_plot[:]], ["acceleration (m/s^2)", "position (m)", "velocity_acc", "velocity_pos", "velocity_estimate"])
+        self.plot([acc_plot[:], pos_plot[:], vel_acc_plot[:], vel_pos_plot[:], vel_est_plot[:]], [r"acc ($m/s^2$)", r"pos ($m$) ($\times10^{-2})$", "velocity_acc", "velocity_pos", "velocity_estimate"])
 
 if __name__=="__main__":
     try:

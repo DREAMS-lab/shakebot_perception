@@ -137,7 +137,7 @@ class velocity_calc:
                 else:
                     axs[2].plot([x[0] for x in i], [x[1] for x in i], label=r'$V$')
                     count+=1
-                axs[2].set(xlabel=r"time ($s$)", ylabel=r"velocity ($m/s$)")
+                axs[2].set(xlabel=r"time ($s$)", ylabel=r"vel ($m/s$)")
             else:
                 if "acc" in label:
                     axs[idx].scatter([x[0] for x in i], [x[1] for x in i], label=label, marker="x")

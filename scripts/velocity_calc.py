@@ -147,7 +147,7 @@ class velocity_calc:
                     axs[idx].scatter([x[0] for x in i], [x[1]*100 for x in i], label=label, marker="x")
                     axs[idx].set(ylabel=label)
                     axs[idx].grid(linestyle="dashdot")
-        plt.legend(loc="upper right", prop={"size":5})
+        plt.legend(loc="upper right", prop={"size":7})
         plt.grid(linestyle="dashdot")
         plt.show()
         

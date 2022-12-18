@@ -123,32 +123,49 @@ class velocity_calc:
         return ex_data
     
     def plot(self, data, labels):
+        markerSize = 4**2
+        xLimRight = 0.8
+        gridStyle = "dashdot"
+        saveFl = True
         global axs
         fig, axs = plt.subplots(3)
         count=0
         for idx, i, label in zip(range(len(data)),data,labels):
             if "velocity" in label:
                 if count == 0:
-                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$V_A$', marker="x")
+                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$V_A$', marker="x", s=markerSize)
                     count+=1
                 elif count == 1:
-                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$V_D$', marker="o")
+                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$V_D$', marker="o", s=markerSize)
                     count+=1
                 else:
-                    axs[2].plot([x[0] for x in i], [x[1] for x in i], label=r'$V$')
+                    axs[2].plot([x[0] for x in i], [x[1] for x in i], label=r'$V$', markersize=2)
                     count+=1
-                axs[2].set(xlabel=r"time ($s$)", ylabel=r"vel ($m/s$)")
+                axs[2].set(xlabel=r"time ($s$)", ylabel=r"V ($m/s$)")
+                axs[2].set_xlim(right=xLimRight)
+                axs[2].tick_params(direction="in")
             else:
-                if "acc" in label:
-                    axs[idx].scatter([x[0] for x in i], [x[1] for x in i], label=label, marker="x")
+                if "m/s^2" in label:
+                    axs[idx].scatter([x[0] for x in i], [x[1] for x in i], label=label, marker="x", s=markerSize)
+                    axs[idx].set_xticklabels([])
+                    axs[idx].tick_params(direction="in")
                     axs[idx].set(ylabel=label)
-                    axs[idx].grid(linestyle="dashdot")
+                    axs[idx].grid(linestyle=gridStyle)
+                    axs[idx].set_xlim(right=xLimRight)
+                    
                 else:
-                    axs[idx].scatter([x[0] for x in i], [x[1]*100 for x in i], label=label, marker="x")
+                    axs[idx].scatter([x[0] for x in i], [x[1]*100 for x in i], label=label, marker="x", s=markerSize)
+                    axs[idx].set_xticklabels([])
+                    axs[idx].tick_params(direction="in")
                     axs[idx].set(ylabel=label)
-                    axs[idx].grid(linestyle="dashdot")
+                    axs[idx].grid(linestyle=gridStyle)
+                    axs[idx].set_xlim(right=xLimRight)
+                    
+                    
         plt.legend(loc="upper right", prop={"size":7})
-        plt.grid(linestyle="dashdot")
+        plt.grid(linestyle=gridStyle)
+        if saveFl:
+            plt.savefig('data\\results_imgs\\velocity_fusion.png', dpi=300)
         plt.show()
         
     def read_data(self, file):
@@ -230,7 +247,7 @@ class velocity_calc:
         # ploting data
         est_model = np.poly1d(np.polyfit(np.array(acc_tstamp[:n_acc]+pos_tstamp[:n_pos]), np.array(vel_acc+vel_pos), 3))
         vel_est_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], est_model(acc_tstamp[:n_acc]))]
-        self.plot([acc_plot[:], pos_plot[:], vel_acc_plot[:], vel_pos_plot[:], vel_est_plot[:]], [r"acc ($m/s^2$)", r"pos ($m$) ($\times10^{-2})$", "velocity_acc", "velocity_pos", "velocity_estimate"])
+        self.plot([acc_plot[:], pos_plot[:], vel_acc_plot[:], vel_pos_plot[:], vel_est_plot[:]], [r"a ($m/s^2$)", r"d ($cm$)", "velocity_acc", "velocity_pos", "velocity_estimate"])
 
 if __name__=="__main__":
     try:

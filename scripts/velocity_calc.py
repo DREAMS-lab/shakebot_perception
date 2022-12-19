@@ -127,6 +127,7 @@ class velocity_calc:
         xLimRight = 0.8
         gridStyle = "dashdot"
         saveFl = True
+        plt.rc('font', size=12)
         global axs
         fig, axs = plt.subplots(3)
         count=0
@@ -247,7 +248,7 @@ class velocity_calc:
         # ploting data
         est_model = np.poly1d(np.polyfit(np.array(acc_tstamp[:n_acc]+pos_tstamp[:n_pos]), np.array(vel_acc+vel_pos), 3))
         vel_est_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], est_model(acc_tstamp[:n_acc]))]
-        self.plot([acc_plot[:], pos_plot[:], vel_acc_plot[:], vel_pos_plot[:], vel_est_plot[:]], [r"a ($m/s^2$)", r"d ($cm$)", "velocity_acc", "velocity_pos", "velocity_estimate"])
+        self.plot([acc_plot[:], pos_plot[:], vel_acc_plot[:], vel_pos_plot[:], vel_est_plot[:]], [r"A ($m/s^2$)", r"D ($cm$)", "velocity_acc", "velocity_pos", "velocity_estimate"])
 
 if __name__=="__main__":
     try:

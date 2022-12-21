@@ -134,15 +134,15 @@ class velocity_calc:
         for idx, i, label in zip(range(len(data)),data,labels):
             if "velocity" in label:
                 if count == 0:
-                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$V_A$', marker="x", s=markerSize)
+                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$v_a$', marker="x", s=markerSize)
                     count+=1
                 elif count == 1:
-                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$V_D$', marker="o", s=markerSize)
+                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$v_d$', marker="o", s=markerSize)
                     count+=1
                 else:
-                    axs[2].plot([x[0] for x in i], [x[1] for x in i], label=r'$V$', markersize=2)
+                    axs[2].plot([x[0] for x in i], [x[1] for x in i], label=r'$\hat{v}$', markersize=2)
                     count+=1
-                axs[2].set(xlabel=r"time ($s$)", ylabel=r"V ($m/s$)")
+                axs[2].set(xlabel=r"time ($s$)", ylabel=r"$\hat{v} ~ (m/s)$")
                 axs[2].set_xlim(right=xLimRight)
                 axs[2].tick_params(direction="in")
             else:
@@ -248,7 +248,7 @@ class velocity_calc:
         # ploting data
         est_model = np.poly1d(np.polyfit(np.array(acc_tstamp[:n_acc]+pos_tstamp[:n_pos]), np.array(vel_acc+vel_pos), 3))
         vel_est_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], est_model(acc_tstamp[:n_acc]))]
-        self.plot([acc_plot[:], pos_plot[:], vel_acc_plot[:], vel_pos_plot[:], vel_est_plot[:]], [r"A ($m/s^2$)", r"D ($cm$)", "velocity_acc", "velocity_pos", "velocity_estimate"])
+        self.plot([acc_plot[:], pos_plot[:], vel_acc_plot[:], vel_pos_plot[:], vel_est_plot[:]], [r"$a~(m/s^2)$", r"$d~(cm)$", "velocity_acc", "velocity_pos", "velocity_estimate"])
 
 if __name__=="__main__":
     try:

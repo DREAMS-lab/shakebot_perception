@@ -126,7 +126,7 @@ class velocity_calc:
         markerSize = 4**2
         xLimRight = 0.8
         gridStyle = "dashdot"
-        saveFl = True
+        saveFl = False
         plt.rc('font', size=12)
         global axs
         fig, axs = plt.subplots(3)
@@ -205,10 +205,10 @@ class velocity_calc:
         return y
     
     def main(self):
-        # fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/record*"))[-1]
-        # recorded_09_07_22_12_49_28
-        # fname = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/recorded_09_07_22_12_49_28.json"       # Use this for linux
-        fname = "data\\recorded_09_07_22_12_49_28.json"      # Use this for Windows
+        # fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/raw/record*"))[-1]
+        # recorded_09_07_22_12_49_28, recorded_01_24_23_12_02_42.json
+        # fname = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/raw/recorded_09_07_22_12_49_28.json"       # Use this for linux
+        fname = sorted(glob.glob("data\\raw\\record*"))[-14]      # Use this for Windows
 
         # print(fname)
         self.data = self.read_data(fname)

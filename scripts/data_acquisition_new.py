@@ -136,7 +136,7 @@ class data_acquisition:
                     if self.write is True:
                         rospy.loginfo("saving file.....")
                         fname = time.strftime("recorded_%m_%d_%y_%H_%M_%S", time.localtime())+".json"
-                        outfile = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/" + fname
+                        outfile = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/raw/" + fname
                         # print(self.data)
                         with open(outfile, "w") as f:
                             json_object = json.dumps(self.data, indent=4)

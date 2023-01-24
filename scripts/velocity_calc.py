@@ -17,8 +17,8 @@ class velocity_calc:
         self.alpha = self.readAlpha()/1000
         
     def readAlpha(self):
-        # outf = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/config/perceptionCalib.yaml"     # Use this for linux
-        outf = "config\perceptionCalib.yaml"       # Use this for Windows
+        outf = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/config/perceptionCalib.yaml"     # Use this for linux
+        # outf = "config\perceptionCalib.yaml"       # Use this for Windows
         with open(outf,"r") as f:
             param = f.read()
             param = float(param.strip('[').strip("]"))
@@ -206,9 +206,9 @@ class velocity_calc:
     
     def main(self):
         # fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/raw/record*"))[-1]
-        # recorded_09_07_22_12_49_28, recorded_01_24_23_12_02_42.json
-        # fname = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/raw/recorded_09_07_22_12_49_28.json"       # Use this for linux
-        fname = sorted(glob.glob("data\\raw\\record*"))[-14]      # Use this for Windows
+        # recorded_09_07_22_12_49_28, recorded_01_24_23_12_02_42.json(0.1, 0.1), recorded_01_24_23_15_55_18.json(0.1, 0.1)
+        fname = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/raw/recorded_01_24_23_15_55_18.json"       # Use this for linux
+        # fname = sorted(glob.glob("data\\raw\\record*"))[-1]      # Use this for Windows
 
         # print(fname)
         self.data = self.read_data(fname)
@@ -246,7 +246,7 @@ class velocity_calc:
         vel_acc_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], vel_acc)]
         
         # ploting data
-        est_model = np.poly1d(np.polyfit(np.array(acc_tstamp[:n_acc]+pos_tstamp[:n_pos]), np.array(vel_acc+vel_pos), 3))
+        est_model = np.poly1d(np.polyfit(np.array(acc_tstamp[:n_acc]+pos_tstamp[:n_pos]), np.array(vel_acc+vel_pos), 6))
         vel_est_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], est_model(acc_tstamp[:n_acc]))]
         self.plot([acc_plot[:], pos_plot[:], vel_acc_plot[:], vel_pos_plot[:], vel_est_plot[:]], [r"$a~(m/s^2)$", r"$d~(cm)$", "velocity_acc", "velocity_pos", "velocity_estimate"])
 

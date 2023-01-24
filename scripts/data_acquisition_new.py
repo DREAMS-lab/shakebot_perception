@@ -20,6 +20,7 @@ class data_acquisition:
         self.tagsDict = {}
         self.data = {}
         self.home = {}
+        self.homeSet = False
         self.detected = False
         self.record = False
         self.write = False
@@ -90,6 +91,13 @@ class data_acquisition:
                     self.initialize = False
                     rospy.loginfo("Home position set success!")
                     rospy.loginfo("publish goal to start recording!!")
+                    
+                if self.homeSet is True:
+                    time.sleep(1)
+                    self.setHomePose(self.tagsDict)
+                    self.homeSet = False
+                    rospy.loginfo("Home position set success!")
+                    rospy.loginfo("Publish goal once again to start recording.")
                 
                 if self.record is True:
                     FPose = {}
@@ -156,7 +164,8 @@ class data_acquisition:
                         s.main()
                     except Exception as e:
                         print(e)
-                    rospy.loginfo("Publish goal once again to start recording.")
+                    self.homeSet = True
+                    
     
     def main(self):
         rospy.Subscriber("/apriltag_detection/tag_detections", AprilTagDetectionArray, self.setBedPose)

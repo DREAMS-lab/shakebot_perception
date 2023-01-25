@@ -139,6 +139,7 @@ class data_acquisition:
                     
                 if self.goal_recorder_state is False:
                     rospy.loginfo("stopped recording")
+                    time.sleep(0.2)
                     self.record = False
                     self.write = True
                     if self.write is True:

@@ -7,7 +7,7 @@ import glob
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import InterpolatedUnivariateSpline
-from scipy.signal import butter, filtfilt
+from scipy.signal import butter, filtfilt, savgol_filter
 from datetime import timedelta
 
 
@@ -17,8 +17,8 @@ class velocity_calc:
         self.alpha = self.readAlpha()/1000
         
     def readAlpha(self):
-        outf = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/config/perceptionCalib.yaml"     # Use this for linux
-        # outf = "config\perceptionCalib.yaml"       # Use this for Windows
+        # outf = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/config/perceptionCalib.yaml"     # Use this for linux
+        outf = "config\perceptionCalib.yaml"       # Use this for Windows
         with open(outf,"r") as f:
             param = f.read()
             param = float(param.strip('[').strip("]"))
@@ -134,10 +134,12 @@ class velocity_calc:
         for idx, i, label in zip(range(len(data)),data,labels):
             if "velocity" in label:
                 if count == 0:
-                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$v_a$', marker="x", s=markerSize)
+                    # axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$v_a$', marker="x", s=markerSize)
+                    axs[2].plot([x[0] for x in i], [x[1] for x in i], label=r'$v_a$', markersize=2)
                     count+=1
                 elif count == 1:
-                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$v_d$', marker="o", s=markerSize)
+                    # axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$v_d$', marker="o", s=markerSize)
+                    axs[2].plot([x[0] for x in i], [x[1] for x in i], label=r'$v_d$', markersize=2)
                     count+=1
                 else:
                     axs[2].plot([x[0] for x in i], [x[1] for x in i], label=r'$\hat{v}$', markersize=2)
@@ -207,13 +209,20 @@ class velocity_calc:
     def main(self):
         # fname = sorted(glob.glob("/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/raw/record*"))[-1]
         # recorded_09_07_22_12_49_28, recorded_01_24_23_12_02_42.json(0.1, 0.1), recorded_01_24_23_15_55_18.json(0.1, 0.1), recorded_01_25_23_11_29_46.json(0.1,0.1)
-        fname = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/raw/recorded_01_25_23_11_29_46.json"       # Use this for linux
+        # fname = "/home/"+os.environ.get("USERNAME")+"/catkin_ws/src/shakebot_perception/data/raw/recorded_01_25_23_11_29_46.json"       # Use this for linux
+        fname = "data\\raw\\recorded_01_25_23_11_29_46.json"
         # fname = sorted(glob.glob("data\\raw\\record*"))[-1]      # Use this for Windows
 
         # print(fname)
+        winSize = 8
         self.data = self.read_data(fname)
         pos = self.extractData("pos", self.data)
         acc = self.extractData("acc", self.data)
+        
+        pos = pos[1:-3]
+        pos_tstamp = [x[0] for x in pos]
+        acc = acc[5:-12]
+        acc_tstamp = [x[0] for x in acc]
         
         # displacement processing to get velocity
         T_pos = [x[0] for x in pos][-1]        # Sample period
@@ -222,15 +231,11 @@ class velocity_calc:
         order_pos = 2         # butterworth filter order
         n_pos = int(T_pos * fs_pos)   # total number of samples
         
-        pos = pos[1:-3]
-        pos_tstamp = [x[0] for x in pos]
         pos_tbf = [x[1]*-self.alpha for x in pos]
         filtered_pos = self.butter_lowpass_filter(pos_tbf, cutoff_pos, fs_pos, order_pos, n_pos)
+        pos_savgol = savgol_filter(filtered_pos, winSize, 3, mode='nearest')
         pos_plot = [[i,j] for i,j in zip(pos_tstamp[:n_pos], filtered_pos)]
-        vel_pos = self.get_velocity_fpos(pos_tstamp[:n_pos], filtered_pos)
-        vel_pos_plot = [[i,j] for i,j in zip(pos_tstamp[:n_pos], vel_pos)]
-        # vel_pos = self.get_velocity_fpos(pos_tstamp, pos_tbf)
-        # vel_pos_plot = [[i,j] for i,j in zip(pos_tstamp, vel_pos)]
+        pos_savgol_fn = InterpolatedUnivariateSpline(pos_tstamp[:n_pos], pos_savgol, k=1)
         
         # acceleration processing to get velocity
         T_acc = [x[0] for x in acc][-1]        # Sample period
@@ -239,17 +244,25 @@ class velocity_calc:
         order_acc = 2         # butterworth filter order
         n_acc = int(T_acc * fs_acc)   # total number of samples
         
-        acc = acc[5:-12]
-        acc_tstamp = [x[0] for x in acc]
-        acc_tbf = [((x[1]*-9.81)+0.2) for x in acc]
+        acc_tbf = [((x[1]*-9.81)+0.25) for x in acc]
         filtered_acc = self.butter_lowpass_filter(acc_tbf, cutoff_acc, fs_acc, order_acc, n_acc)
+        acc_savgol = savgol_filter(filtered_acc, winSize, 3, mode='nearest')
         acc_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], filtered_acc)]
-        vel_acc = self.get_velocity_facc(acc_tstamp[:n_acc], [x for x in filtered_acc])
-        vel_acc_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], vel_acc)]
+        acc_savgol_fn = InterpolatedUnivariateSpline(acc_tstamp[:n_acc], acc_savgol, k=1)
+        
+        # velocity Estimation
+        nofSamples = 20
+        combined_tstamp = [x[0] for x in acc_plot+pos_plot]
+        sampled_tstamp = np.linspace(combined_tstamp[0], combined_tstamp[-1], nofSamples)
+        vel_pos = self.get_velocity_fpos(sampled_tstamp, [x for x in pos_savgol_fn(sampled_tstamp)])
+        vel_pos_plot = [[i,j] for i,j in zip(sampled_tstamp, vel_pos)]
+        vel_acc = self.get_velocity_facc(sampled_tstamp, [x for x in acc_savgol_fn(sampled_tstamp)])
+        vel_acc_plot = [[i,j] for i,j in zip(sampled_tstamp, vel_acc)]
         
         # ploting data
-        est_model = np.poly1d(np.polyfit(np.array(acc_tstamp[:n_acc]+pos_tstamp[:n_pos]), np.array(vel_acc+vel_pos), 6))
-        vel_est_plot = [[i,j] for i,j in zip(acc_tstamp[:n_acc], est_model(acc_tstamp[:n_acc]))]
+        # est_model = np.poly1d(np.polyfit(np.array(sampled_tstamp+sampled_tstamp), np.array(vel_acc+vel_pos), 6))
+        est_model = savgol_filter(vel_pos+vel_acc, winSize+8, 3, mode='nearest')
+        vel_est_plot = [[i,j] for i,j in zip(sampled_tstamp, est_model)]
         self.plot([acc_plot[:], pos_plot[:], vel_acc_plot[:], vel_pos_plot[:], vel_est_plot[:]], [r"$a~(m/s^2)$", r"$d~(cm)$", "velocity_acc", "velocity_pos", "velocity_estimate"])
 
 if __name__=="__main__":

@@ -126,7 +126,7 @@ class velocity_calc:
         markerSize = 4**2
         xLimRight = 0.8
         gridStyle = "dashdot"
-        saveFl = False
+        saveFl = True
         plt.rc('font', size=12)
         global axs
         fig, axs = plt.subplots(3)
@@ -134,12 +134,12 @@ class velocity_calc:
         for idx, i, label in zip(range(len(data)),data,labels):
             if "velocity" in label:
                 if count == 0:
-                    # axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$v_a$', marker="x", s=markerSize)
-                    axs[2].plot([x[0] for x in i], [x[1] for x in i], label=r'$v_a$', markersize=2)
+                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$v_a$', marker="x", s=markerSize)
+                    # axs[2].plot([x[0] for x in i], [x[1] for x in i], label=r'$v_a$', markersize=2)
                     count+=1
                 elif count == 1:
-                    # axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$v_d$', marker="o", s=markerSize)
-                    axs[2].plot([x[0] for x in i], [x[1] for x in i], label=r'$v_d$', markersize=2)
+                    axs[2].scatter([x[0] for x in i], [x[1] for x in i], label=r'$v_d$', marker="o", s=markerSize)
+                    # axs[2].plot([x[0] for x in i], [x[1] for x in i], label=r'$v_d$', markersize=2)
                     count+=1
                 else:
                     axs[2].plot([x[0] for x in i], [x[1] for x in i], label=r'$\hat{v}$', markersize=2)
@@ -219,22 +219,22 @@ class velocity_calc:
         pos = self.extractData("pos", self.data)
         acc = self.extractData("acc", self.data)
         
-        pos = pos[1:-3]
+        pos = pos[1:-2]
         pos_tstamp = [x[0] for x in pos]
-        acc = acc[5:-12]
+        acc = acc[4:-13]
         acc_tstamp = [x[0] for x in acc]
         
         # displacement processing to get velocity
         T_pos = [x[0] for x in pos][-1]        # Sample period
         fs_pos = 25          # Accelerometer sampling rate, Hz
-        cutoff_pos = 5       # desired cutoff frequency of the filter, Hz, slightly higher than actual 30 Hz 
+        cutoff_pos = 2       # desired cutoff frequency of the filter, Hz, slightly higher than actual 30 Hz 
         order_pos = 2         # butterworth filter order
         n_pos = int(T_pos * fs_pos)   # total number of samples
         
         pos_tbf = [x[1]*-self.alpha for x in pos]
         filtered_pos = self.butter_lowpass_filter(pos_tbf, cutoff_pos, fs_pos, order_pos, n_pos)
         pos_savgol = savgol_filter(filtered_pos, winSize, 3, mode='nearest')
-        pos_plot = [[i,j] for i,j in zip(pos_tstamp[:n_pos], filtered_pos)]
+        pos_plot = [[i,j] for i,j in zip(pos_tstamp[:n_pos], pos_savgol)]
         pos_savgol_fn = InterpolatedUnivariateSpline(pos_tstamp[:n_pos], pos_savgol, k=1)
         
         # acceleration processing to get velocity
@@ -258,11 +258,12 @@ class velocity_calc:
         vel_pos_plot = [[i,j] for i,j in zip(sampled_tstamp, vel_pos)]
         vel_acc = self.get_velocity_facc(sampled_tstamp, [x for x in acc_savgol_fn(sampled_tstamp)])
         vel_acc_plot = [[i,j] for i,j in zip(sampled_tstamp, vel_acc)]
+        # print(len(np.array(list(sampled_tstamp)+list(sampled_tstamp))))
         
         # ploting data
-        # est_model = np.poly1d(np.polyfit(np.array(sampled_tstamp+sampled_tstamp), np.array(vel_acc+vel_pos), 6))
-        est_model = savgol_filter(vel_pos+vel_acc, winSize+8, 3, mode='nearest')
-        vel_est_plot = [[i,j] for i,j in zip(sampled_tstamp, est_model)]
+        est_model = np.poly1d(np.polyfit(np.array(list(sampled_tstamp)+list(sampled_tstamp)), np.array(vel_acc+vel_pos), 6))
+        # est_model = savgol_filter(vel_pos+vel_acc, winSize+8, 3, mode='nearest')
+        vel_est_plot = [[i,j] for i,j in zip(sampled_tstamp, est_model(sampled_tstamp))]
         self.plot([acc_plot[:], pos_plot[:], vel_acc_plot[:], vel_pos_plot[:], vel_est_plot[:]], [r"$a~(m/s^2)$", r"$d~(cm)$", "velocity_acc", "velocity_pos", "velocity_estimate"])
 
 if __name__=="__main__":
